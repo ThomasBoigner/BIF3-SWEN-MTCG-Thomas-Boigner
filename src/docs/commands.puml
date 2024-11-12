@@ -1,0 +1,41 @@
+@startuml
+hide methods
+
+class CreateUserCommand {
+    username: String
+    password: String
+}
+
+class AuthenticationCommand {
+    username: String
+    password: String
+}
+
+class CreatePackageCommand {
+    id: UUID
+    name: String
+    damage: double
+}
+
+class ConfigureDeckCommand {
+    ids: List<UUID>
+}
+
+class UpdateUserCommand {
+    name: String
+    bio: String
+    image: String
+}
+
+class CreateTradeCommand {
+    id: UUID
+    cardToTrade: String
+    type: String
+    minimumDamage: double
+}
+
+class AcceptTradeCommand {
+    cardId: UUID
+}
+
+@enduml

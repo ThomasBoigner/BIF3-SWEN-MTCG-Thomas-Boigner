@@ -1,0 +1,71 @@
+@startuml
+hide methods
+
+class User {
+    UUID id
+    username: String
+    password: String
+    bio: String
+    image: String
+    coins: int
+    elo: int
+    battlesFought: int
+
+    stack: List<Card>
+    deck: List<Card>
+}
+
+class Card {
+    UUID id
+    name: String
+    damage: double
+
+    user: User
+    damageType: DamageType
+    trade: Trade
+    package: Package
+}
+
+enum DamageType {
+    FIRE,
+    WATER,
+    NORMAL
+}
+
+class SpellCard extends Card {
+    criticalHitChance: double
+}
+
+class MonsterCard extends Card {
+    defence: double
+}
+
+class Package {
+    UUID id
+    price: int
+    cards: List<Card>
+}
+
+class Trade {
+    UUID id
+    type: CardType
+    minimumDamage: double
+
+    cardToTrade: Card
+    trader: User
+}
+
+enum CardTypes {
+    MONSTER,
+    SPELL
+}
+
+User "0..1" o--o "0..20" Card : stack
+User "0..1" o--o "0..5" Card : deck
+
+Card -left- DamageType
+Card "0..1" o-right-* "1" Trade
+Card "5" o--* "1" Package
+
+Trade -- CardTypes
+@enduml
