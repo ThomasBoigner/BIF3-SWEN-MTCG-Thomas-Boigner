@@ -13,6 +13,7 @@ class User {
 
     stack: List<Card>
     deck: List<Card>
+    trades: List<Trade>
 }
 
 class Card {
@@ -68,4 +69,5 @@ Card "0..1" o-right-* "1" Trade
 Card "5" o--* "1" Package
 
 Trade -- CardTypes
+Trade "0..n" *-up-o "1" User
 @enduml
