@@ -2,6 +2,10 @@ package at.fhtw;
 
 import at.fhtw.httpserver.server.Server;
 import at.fhtw.httpserver.utils.Router;
+import at.fhtw.mtcgapp.persistence.repository.UserRepositoryImpl;
+import at.fhtw.mtcgapp.presentation.UserController;
+import at.fhtw.mtcgapp.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -19,6 +23,9 @@ public class Main {
 
     private static Router configureRouter(){
         Router router = new Router();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        router.addService("/users", new UserController(new UserService(new UserRepositoryImpl()), objectMapper));
 
         return router;
     }

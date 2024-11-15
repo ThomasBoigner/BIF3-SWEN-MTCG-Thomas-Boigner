@@ -1,8 +1,7 @@
-package mtcgapp.service;
+package at.fhtw.mtcgapp.service;
 
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
-import at.fhtw.mtcgapp.service.UserService;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
