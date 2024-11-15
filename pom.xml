@@ -13,22 +13,44 @@
         <maven.compiler.target>23</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <lombok.version>1.18.34</lombok.version>
+        <!--Parser-->
+        <jackson-annotations.version>2.15.4</jackson-annotations.version>
+        <jackson-databind.version>2.15.4</jackson-databind.version>
+        <!--Database-->
+        <postgresql.version>42.7.4</postgresql.version>
+        <!--Testing-->
         <junit-jupiter-engine.version>5.10.2</junit-jupiter-engine.version>
         <assertj-core.version>3.26.3</assertj-core.version>
         <mockito-core.version>5.11.0</mockito-core.version>
+        <!--Logging-->
         <log4j-api.version>2.23.1</log4j-api.version>
         <log4j-core.version>2.23.1</log4j-core.version>
         <log4j-slf4j-impl.version>2.23.1</log4j-slf4j-impl.version>
+        <!--Other-->
+        <lombok.version>1.18.34</lombok.version>
     </properties>
 
     <dependencies>
+        <!--Parser-->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-annotations.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
         </dependency>
 
+        <!--Database-->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+
+        <!--Testing-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -40,7 +62,6 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -48,6 +69,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!--Logging-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -62,6 +84,13 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j-slf4j-impl.version}</version>
+        </dependency>
+
+        <!--Other-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
         </dependency>
     </dependencies>
     <repositories>
