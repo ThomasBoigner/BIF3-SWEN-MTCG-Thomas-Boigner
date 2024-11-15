@@ -4,4 +4,5 @@ import at.fhtw.mtcgapp.model.User;
 
 public interface UserRepository {
     User save(User user);
+    boolean existsByUsername(String username);
 }

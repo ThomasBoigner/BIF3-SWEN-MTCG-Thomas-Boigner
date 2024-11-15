@@ -19,9 +19,10 @@
         <!--Database-->
         <postgresql.version>42.7.4</postgresql.version>
         <!--Testing-->
-        <junit-jupiter-engine.version>5.10.2</junit-jupiter-engine.version>
+        <junit-jupiter-engine.version>5.11.3</junit-jupiter-engine.version>
         <assertj-core.version>3.26.3</assertj-core.version>
-        <mockito-core.version>5.11.0</mockito-core.version>
+        <mockito-core.version>5.14.2</mockito-core.version>
+        <mockito-junit-jupiter.version>5.14.2</mockito-junit-jupiter.version>
         <!--Logging-->
         <log4j-api.version>2.23.1</log4j-api.version>
         <log4j-core.version>2.23.1</log4j-core.version>
@@ -66,6 +67,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito-junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
