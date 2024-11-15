@@ -14,4 +14,7 @@ import java.util.UUID;
 public class Trade {
     private UUID id;
     private double minimumDamage;
+
+    private Card cardToTrade;
+    private User trader;
 }

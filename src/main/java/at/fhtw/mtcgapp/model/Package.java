@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -14,4 +15,6 @@ import java.util.UUID;
 public class Package {
     private UUID id;
     private int price;
+
+    private List<Card> cards;
 }
