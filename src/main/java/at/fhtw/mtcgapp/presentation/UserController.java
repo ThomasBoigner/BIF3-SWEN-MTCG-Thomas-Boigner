@@ -5,7 +5,6 @@ import at.fhtw.httpserver.http.HttpStatus;
 import at.fhtw.httpserver.http.Method;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
-import at.fhtw.httpserver.server.RestController;
 import at.fhtw.mtcgapp.service.UserService;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
@@ -18,14 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 
 @Slf4j
-public class UserController implements RestController {
+public class UserController extends AbstractController {
     private final UserService userService;
     private final ObjectMapper objectMapper;
 
     @Override
     public Response handleRequest(Request request) {
         if (request.getMethod() == Method.POST) {
-            return createUser(request);
+            return handleServiceErrors(request, this::createUser);
         }
 
         return new Response(
