@@ -28,7 +28,7 @@ public class UserService {
         }
 
         User user = User.builder()
-                .id(UUID.randomUUID())
+                .token(UUID.randomUUID())
                 .username(command.username())
                 .password(command.password())
                 .bio("")

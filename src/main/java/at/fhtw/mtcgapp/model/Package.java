@@ -13,7 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class Package {
-    private UUID id;
+    private long id;
+    private UUID token;
     private int price;
 
     private List<Card> cards;

@@ -2,7 +2,8 @@
 hide methods
 
 class User {
-    UUID id
+    id: long
+    token: UUID
     username: String
     password: String
     bio: String
@@ -17,7 +18,8 @@ class User {
 }
 
 class Card {
-    UUID id
+    id: long
+    token: UUID
     name: String
     damage: double
 
@@ -42,13 +44,15 @@ class MonsterCard extends Card {
 }
 
 class Package {
-    UUID id
+    id: long
+    token: UUID
     price: int
     cards: List<Card>
 }
 
 class Trade {
-    UUID id
+    id: long
+    token: UUID
     type: CardType
     minimumDamage: double
 

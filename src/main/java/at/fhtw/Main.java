@@ -2,6 +2,7 @@ package at.fhtw;
 
 import at.fhtw.httpserver.server.Server;
 import at.fhtw.httpserver.utils.Router;
+import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import at.fhtw.mtcgapp.persistence.repository.UserRepositoryImpl;
 import at.fhtw.mtcgapp.presentation.UserController;
 import at.fhtw.mtcgapp.service.UserService;
@@ -24,8 +25,9 @@ public class Main {
     private static Router configureRouter(){
         Router router = new Router();
         ObjectMapper objectMapper = new ObjectMapper();
+        UnitOfWork unitOfWork = new UnitOfWork();
 
-        router.addService("/users", new UserController(new UserService(new UserRepositoryImpl()), objectMapper));
+        router.addService("/users", new UserController(new UserService(new UserRepositoryImpl(unitOfWork)), objectMapper));
 
         return router;
     }

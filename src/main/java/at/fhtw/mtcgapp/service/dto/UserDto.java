@@ -10,7 +10,7 @@ import java.util.UUID;
 @Builder
 public record UserDto(UUID id, String username, String bio, String image, int coins, int elo, int battlesFought) {
     public UserDto(User user) {
-        this(user.getId(), user.getUsername(), user.getBio(), user.getImage(), user.getCoins(), user.getElo(), user.getBattlesFought());
+        this(user.getToken(), user.getUsername(), user.getBio(), user.getImage(), user.getCoins(), user.getElo(), user.getBattlesFought());
         log.debug("Created UserDto {}", this);
     }
 }
