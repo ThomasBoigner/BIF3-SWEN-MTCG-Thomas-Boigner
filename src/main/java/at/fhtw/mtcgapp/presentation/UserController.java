@@ -14,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
+
 @RequiredArgsConstructor
 
 @Slf4j
@@ -36,6 +38,7 @@ public class UserController extends AbstractController {
 
     private Response createUser(Request request) {
         log.debug("Incoming http POST request {}", request);
+        Objects.requireNonNull(request.getBody(), "Body must not be null!");
 
         CreateUserCommand command;
         try {

@@ -75,13 +75,20 @@ public class UserControllerTest {
                 .body("")
                 .build();
 
-        UserDto userDto = UserDto.builder()
-                .username("Thomas")
-                .bio("")
-                .image("")
-                .elo(0)
-                .battlesFought(0)
-                .coins(20)
+        // When
+        Response response = userController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void ensureCreateUserReturnsStatus400WhenBodyIsNull() throws JsonProcessingException {
+        // Given
+        Request request = Request.builder()
+                .method(Method.POST)
+                .pathname("/users")
+                .body(null)
                 .build();
 
         // When
@@ -89,5 +96,7 @@ public class UserControllerTest {
 
         // Then
         assertThat(response.getStatus()).isEqualTo(400);
+        assertThat(response.getContentType()).isEqualTo("application/json");
+        assertThat(response.getContent()).isEqualTo("Body must not be null!");
     }
 }

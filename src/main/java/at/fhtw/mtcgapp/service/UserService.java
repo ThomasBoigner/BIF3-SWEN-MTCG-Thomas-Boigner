@@ -1,5 +1,6 @@
 package at.fhtw.mtcgapp.service;
 
+import at.fhtw.mtcgapp.model.DamageType;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
@@ -20,7 +21,6 @@ public class UserService {
 
     public UserDto createUser(CreateUserCommand command) {
         log.info("Trying to create user with command {}", command);
-        Objects.requireNonNull(command, "command must not be null!");
 
         if (userRepository.existsByUsername(command.username())) {
             log.warn("User with username {} already exists!", command.username());

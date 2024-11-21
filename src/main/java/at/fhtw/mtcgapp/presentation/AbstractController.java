@@ -20,10 +20,11 @@ public abstract class AbstractController implements RestController {
         try{
             return func.apply(request);
         }
-        catch (ValidationException validationException) {
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, validationException.getMessage());
+        catch (IllegalArgumentException | ValidationException | NullPointerException e) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, e.getMessage());
         }
         catch (Exception e) {
+            log.error(e.getMessage(), e);
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

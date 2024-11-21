@@ -37,7 +37,7 @@ public class UserRepositoryImpl implements UserRepository {
             return user;
         } catch (SQLException e) {
             unitOfWork.rollbackTransaction();
-            log.error("Could not create use due to a sql exception", e);
+            log.error("Could not create user due to a sql exception");
             throw new DataAccessException("Insert into failed!", e);
         }
     }
@@ -61,7 +61,7 @@ public class UserRepositoryImpl implements UserRepository {
             return exists;
 
         } catch (SQLException e) {
-            log.error("Could not evaluate if user exists due to a sql exception", e);
+            log.error("Could not evaluate if user exists due to a sql exception");
             throw new DataAccessException("Exists failed!", e);
         }
     }
