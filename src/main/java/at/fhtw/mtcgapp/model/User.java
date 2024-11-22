@@ -13,7 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class User {
-    private UUID id;
+    private long id;
+    private UUID token;
     private String username;
     private String password;
     private String bio;

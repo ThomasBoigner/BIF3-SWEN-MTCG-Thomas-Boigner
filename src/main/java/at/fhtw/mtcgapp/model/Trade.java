@@ -12,7 +12,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class Trade {
-    private UUID id;
+    private long id;
+    private UUID token;
     private double minimumDamage;
 
     private Card cardToTrade;

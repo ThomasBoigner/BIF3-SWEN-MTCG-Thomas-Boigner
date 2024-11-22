@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  postgres:
+    image: 'postgres:17-alpine'
+    container_name: mtcgdb
+    environment:
+      - POSTGRES_USER=mtcgdb
+      - POSTGRES_PASSWORD=mtcgdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - mtcgdb:/var/lib/postgresql/data
+    networks:
+      - mtcg
+
+  pgadmin:
+    image: 'dpage/pgadmin4:latest'
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@instrator.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    networks:
+      - mtcg
+
+volumes:
+  mtcgdb: {}
+
+networks:
+  mtcg:
+    driver: bridge

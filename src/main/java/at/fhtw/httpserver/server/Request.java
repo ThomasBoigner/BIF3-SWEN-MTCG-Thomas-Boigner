@@ -1,10 +1,18 @@
 package at.fhtw.httpserver.server;
 
 import at.fhtw.httpserver.http.Method;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Request {
     private Method method;
     private String urlContent;
