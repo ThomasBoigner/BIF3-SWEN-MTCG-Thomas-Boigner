@@ -5,6 +5,8 @@ import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +26,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp(){
-        userService = new UserService(userRepository);
+        userService = new UserService(userRepository, Validation.buildDefaultValidatorFactory().getValidator());
     }
 
     @Test
@@ -32,7 +34,7 @@ public class UserServiceTest {
         // Given
         CreateUserCommand command = CreateUserCommand.builder()
                 .username("Thomas")
-                .password("pwd")
+                .password("password")
                 .build();
         when(userRepository.existsByUsername(eq(command.username()))).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
@@ -55,11 +57,23 @@ public class UserServiceTest {
         // Given
         CreateUserCommand command = CreateUserCommand.builder()
                 .username("Thomas")
-                .password("pwd")
+                .password("password")
                 .build();
         when(userRepository.existsByUsername(eq(command.username()))).thenReturn(true);
 
         // Assert
         assertThrows(UserValidationException.class, () -> userService.createUser(command));
+    }
+
+    @Test
+    void ensureCreateUserThrowsConstraintViolationExceptionWhenCommandViolatesConstraint(){
+        // Given
+        CreateUserCommand command = CreateUserCommand.builder()
+                .username("Thomas")
+                .password("pwd")
+                .build();
+
+        // Assert
+        assertThrows(ConstraintViolationException.class, () -> userService.createUser(command));
     }
 }

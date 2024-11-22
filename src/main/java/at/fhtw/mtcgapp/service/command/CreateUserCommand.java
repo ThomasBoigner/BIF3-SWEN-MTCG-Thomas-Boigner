@@ -8,10 +8,10 @@ import lombok.Builder;
 @Builder
 public record CreateUserCommand(
         @JsonAlias({"Username"})
-        @NotBlank(message = "Username must not be blank!")
+        @NotBlank(message = "Username must not be blank")
         String username,
         @JsonAlias({"Password"})
-        @NotBlank(message = "Password must not be blank!")
+        @NotBlank(message = "Password must not be blank")
         @Size(min = 4, message = "Password must have at least 4 characters!")
         String password) {
 }
