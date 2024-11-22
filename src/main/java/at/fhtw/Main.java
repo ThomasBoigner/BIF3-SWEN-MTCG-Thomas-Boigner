@@ -7,6 +7,9 @@ import at.fhtw.mtcgapp.persistence.repository.UserRepositoryImpl;
 import at.fhtw.mtcgapp.presentation.UserController;
 import at.fhtw.mtcgapp.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -26,8 +29,10 @@ public class Main {
         Router router = new Router();
         ObjectMapper objectMapper = new ObjectMapper();
         UnitOfWork unitOfWork = new UnitOfWork();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
 
-        router.addService("/users", new UserController(new UserService(new UserRepositoryImpl(unitOfWork)), objectMapper));
+        router.addService("/users", new UserController(new UserService(new UserRepositoryImpl(unitOfWork), validator), objectMapper));
 
         return router;
     }

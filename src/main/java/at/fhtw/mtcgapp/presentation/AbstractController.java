@@ -6,9 +6,13 @@ import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.httpserver.server.RestController;
 import at.fhtw.mtcgapp.service.exception.ValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class AbstractController implements RestController {
@@ -19,6 +23,9 @@ public abstract class AbstractController implements RestController {
         }
         try{
             return func.apply(request);
+        }
+        catch (ConstraintViolationException cExc) {
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, cExc.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", ")));
         }
         catch (IllegalArgumentException | ValidationException | NullPointerException e) {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, e.getMessage());

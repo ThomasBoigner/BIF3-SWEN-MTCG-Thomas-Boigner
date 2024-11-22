@@ -31,6 +31,8 @@
         <log4j-slf4j-impl.version>2.23.1</log4j-slf4j-impl.version>
         <!--Other-->
         <lombok.version>1.18.34</lombok.version>
+        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
+        <expressly.version>5.0.0</expressly.version>
     </properties>
 
     <dependencies>
@@ -113,6 +115,16 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate-validator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <version>${expressly.version}</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
@@ -121,5 +133,4 @@
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
     </repositories>
-
 </project>
