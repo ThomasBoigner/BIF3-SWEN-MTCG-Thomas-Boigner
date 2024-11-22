@@ -1,6 +1,13 @@
 @startuml
 hide methods
 
+class Session {
+    id: long
+    token: String
+
+    user: User
+}
+
 class User {
     id: long
     token: UUID
@@ -67,6 +74,7 @@ enum CardTypes {
 
 User "0..1" o--o "0..20" Card : stack
 User "0..1" o--o "0..5" Card : deck
+User "0..1" o--* "1" Session
 
 Card -left- DamageType
 Card "0..1" o-right-* "1" Trade

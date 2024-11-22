@@ -5,9 +5,8 @@ import at.fhtw.httpserver.http.HttpStatus;
 import at.fhtw.httpserver.http.Method;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
-import at.fhtw.mtcgapp.service.UserService;
-import at.fhtw.mtcgapp.service.command.CreateUserCommand;
-import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.AuthenticationService;
+import at.fhtw.mtcgapp.service.command.LoginCommand;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,14 +18,18 @@ import java.util.Objects;
 @RequiredArgsConstructor
 
 @Slf4j
-public class UserController extends AbstractController {
-    private final UserService userService;
+public class AuthenticationController extends AbstractController{
+    private final AuthenticationService authenticationService;
     private final ObjectMapper objectMapper;
 
     @Override
     public Response handleRequest(Request request) {
-        if (request.getMethod() == Method.POST && request.getPathname().equals("/users")) {
-            return handleServiceErrors(request, this::createUser);
+
+        if (request.getMethod() == Method.POST && request.getPathname().equals("/sessions")) {
+            return handleServiceErrors(request, this::login);
+        }
+        if (request.getMethod() == Method.GET && request.getPathname().equals("/sessions/logout")) {
+            return handleServiceErrors(request, this::logout);
         }
 
         return new Response(
@@ -36,31 +39,27 @@ public class UserController extends AbstractController {
         );
     }
 
-    private Response createUser(Request request) {
-        log.debug("Incoming http POST request {}", request);
+    private Response login(Request request) {
+        log.debug("Incoming http POST login user request {}", request);
         Objects.requireNonNull(request.getBody(), "Body must not be null!");
 
-        CreateUserCommand command;
+        LoginCommand command;
         try {
-            command = objectMapper.readValue(request.getBody(), CreateUserCommand.class);
+            command = objectMapper.readValue(request.getBody(), LoginCommand.class);
         } catch (JsonMappingException e) {
             log.warn("Request body with wrong format was received {}!", request.getBody());
             return new Response(HttpStatus.BAD_REQUEST);
         } catch (JsonProcessingException e) {
-            log.warn("Could not deserialize the create user command {}!", request.getBody());
+            log.warn("Could not deserialize the login user command {}!", request.getBody());
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        UserDto userDto = userService.createUser(command);
+        String token = authenticationService.loginUser(command);
 
-        String json;
-        try {
-            json = objectMapper.writeValueAsString(userDto);
-        } catch (JsonProcessingException e) {
-            log.error("Could not serialize the user dto!", e);
-            return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new Response(HttpStatus.OK, ContentType.JSON, token);
+    }
 
-        return new Response(HttpStatus.CREATED, ContentType.JSON, json);
+    private Response logout(Request request) {
+        throw new UnsupportedOperationException();
     }
 }

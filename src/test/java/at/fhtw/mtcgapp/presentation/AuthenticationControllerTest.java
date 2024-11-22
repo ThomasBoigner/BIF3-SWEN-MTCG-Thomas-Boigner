@@ -3,9 +3,8 @@ package at.fhtw.mtcgapp.presentation;
 import at.fhtw.httpserver.http.Method;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
-import at.fhtw.mtcgapp.service.UserService;
-import at.fhtw.mtcgapp.service.command.CreateUserCommand;
-import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.AuthenticationService;
+import at.fhtw.mtcgapp.service.command.LoginCommand;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,80 +18,71 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserControllerTest {
-    private UserController userController;
+public class AuthenticationControllerTest {
+    private AuthenticationController authenticationController;
     @Mock
-    private UserService userService;
+    private AuthenticationService authenticationService;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        userController = new UserController(userService, objectMapper);
+        authenticationController = new AuthenticationController(authenticationService, objectMapper);
     }
 
     @Test
-    void ensureCreateUserWorksProperly() throws JsonProcessingException {
+    void ensureLoginWorksProperly() throws JsonProcessingException {
         // Given
-        CreateUserCommand userCommand = CreateUserCommand.builder()
+        LoginCommand loginCommand = LoginCommand.builder()
                 .username("Thomas")
-                .password("pwd")
+                .password("password")
                 .build();
 
         Request request = Request.builder()
                 .method(Method.POST)
-                .pathname("/users")
-                .body(objectMapper.writeValueAsString(userCommand))
+                .pathname("/sessions")
+                .body(objectMapper.writeValueAsString(loginCommand))
                 .build();
 
-        UserDto userDto = UserDto.builder()
-                .username("Thomas")
-                .bio("")
-                .image("")
-                .elo(0)
-                .battlesFought(0)
-                .coins(20)
-                .build();
+        when(authenticationService.loginUser(eq(loginCommand))).thenReturn("Thomas-mtgcToken");
 
-        when(userService.createUser(eq(userCommand))).thenReturn(userDto);
+       // When
+       Response response = authenticationController.handleRequest(request);
 
-        // When
-        Response response = userController.handleRequest(request);
-
-        // Then
-        assertThat(response.getStatus()).isEqualTo(201);
-        assertThat(response.getMessage()).isEqualTo("CREATED");
+       // Then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getMessage()).isEqualTo("OK");
         assertThat(response.getContentType()).isEqualTo("application/json");
-        assertThat(response.getContent()).isEqualTo(objectMapper.writeValueAsString(userDto));
+        assertThat(response.getContent()).isEqualTo("Thomas-mtgcToken");
     }
 
     @Test
-    void ensureCreateUserReturnsStatus400WhenCommandCanNotBeParsed() {
+    void ensureLoginReturnsStatus400WhenCommandCanNotBeParsed() {
         // Given
         Request request = Request.builder()
                 .method(Method.POST)
-                .pathname("/users")
+                .pathname("/sessions")
                 .body("")
                 .build();
 
         // When
-        Response response = userController.handleRequest(request);
+        Response response = authenticationController.handleRequest(request);
 
         // Then
         assertThat(response.getStatus()).isEqualTo(400);
     }
 
     @Test
-    void ensureCreateUserReturnsStatus400WhenBodyIsNull() {
+    void ensureLoginReturnsStatus400WhenBodyIsNull() {
         // Given
         Request request = Request.builder()
                 .method(Method.POST)
-                .pathname("/users")
+                .pathname("/sessions")
                 .body(null)
                 .build();
 
         // When
-        Response response = userController.handleRequest(request);
+        Response response = authenticationController.handleRequest(request);
 
         // Then
         assertThat(response.getStatus()).isEqualTo(400);

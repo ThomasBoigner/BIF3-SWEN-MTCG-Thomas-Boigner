@@ -3,8 +3,11 @@ package at.fhtw;
 import at.fhtw.httpserver.server.Server;
 import at.fhtw.httpserver.utils.Router;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
+import at.fhtw.mtcgapp.persistence.repository.SessionRepositoryImpl;
 import at.fhtw.mtcgapp.persistence.repository.UserRepositoryImpl;
+import at.fhtw.mtcgapp.presentation.AuthenticationController;
 import at.fhtw.mtcgapp.presentation.UserController;
+import at.fhtw.mtcgapp.service.AuthenticationService;
 import at.fhtw.mtcgapp.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
@@ -33,6 +36,7 @@ public class Main {
         Validator validator = factory.getValidator();
 
         router.addService("/users", new UserController(new UserService(new UserRepositoryImpl(unitOfWork), validator), objectMapper));
+        router.addService("/sessions", new AuthenticationController(new AuthenticationService(new SessionRepositoryImpl(unitOfWork), validator), objectMapper));
 
         return router;
     }
