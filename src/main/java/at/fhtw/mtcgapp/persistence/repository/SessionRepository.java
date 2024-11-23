@@ -1,8 +1,9 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
-import at.fhtw.mtcgapp.model.User;
+
+import at.fhtw.mtcgapp.model.Session;
 
 public interface SessionRepository {
-    void login(User user);
-    void logout(String token);
+    Session save(Session session);
+    void deleteByToken(String token);
 }

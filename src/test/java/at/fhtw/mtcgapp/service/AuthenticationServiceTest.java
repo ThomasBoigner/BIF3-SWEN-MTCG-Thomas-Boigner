@@ -4,7 +4,6 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.SessionRepository;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.LoginCommand;
-import at.fhtw.mtcgapp.service.exception.AccessDeniedException;
 import at.fhtw.mtcgapp.service.exception.AuthenticationAccessDeniedException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;

@@ -1,5 +1,6 @@
 package at.fhtw.mtcgapp.service;
 
+import at.fhtw.mtcgapp.model.Session;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.SessionRepository;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
@@ -35,8 +36,14 @@ public class AuthenticationService {
             throw AuthenticationAccessDeniedException.wrongCredentials();
         }
 
-        sessionRepository.login(user);
+        String token = String.format("%s-mtcgToken", user.getUsername());
+        Session session = Session.builder()
+                .token(token)
+                .user(user)
+                .build();
+        sessionRepository.save(session);
 
-        return String.format("%s-mtcgToken", user.getUsername());
+        log.debug("Authentication of user {} was successful", user);
+        return token;
     }
 }
