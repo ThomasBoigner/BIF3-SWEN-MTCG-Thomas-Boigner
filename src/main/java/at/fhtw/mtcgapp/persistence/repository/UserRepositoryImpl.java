@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 
@@ -19,7 +21,37 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByUsername(String username) {
-        return Optional.empty();
+        log.debug("Trying to find user with username: {}", username);
+        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                Select *
+                From mtcg.user
+                where username = ?
+                """)) {
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            User user = null;
+            while(resultSet.next())
+            {
+                user = User.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .username(resultSet.getString("username"))
+                        .password(resultSet.getString("password"))
+                        .bio(resultSet.getString("bio"))
+                        .image(resultSet.getString("image"))
+                        .elo(resultSet.getInt("elo"))
+                        .battlesFought(resultSet.getInt("battles_fought"))
+                        .coins(resultSet.getInt("coins"))
+                        .deck(new ArrayList<>())
+                        .stack(new ArrayList<>())
+                        .trades(new ArrayList<>())
+                        .build();
+            }
+            return Optional.ofNullable(user);
+        } catch (SQLException e) {
+            log.error("Could not find user due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
     }
 
     @Override

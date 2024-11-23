@@ -16,6 +16,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -42,6 +43,44 @@ public class UserRepositoryTest {
     @BeforeEach
     void beforeEach() {
         userRepository = new UserRepositoryImpl(new UnitOfWork());
+    }
+
+    @Test
+    void ensureFindByUsernameWorksProperly() {
+        // Given
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        userRepository.save(user);
+        user.setId(1);
+
+        // When
+        Optional<User> fetchedUser = userRepository.findByUsername(user.getUsername());
+
+        // Then
+        assertThat(fetchedUser.isPresent()).isTrue();
+        assertThat(fetchedUser.get()).isEqualTo(user);
+    }
+
+    @Test
+    void ensureFindByUsernameReturnsEmptyOptional() {
+        // When
+        Optional<User> fetchedUser = userRepository.findByUsername("Thomas");
+
+        // Then
+        assertThat(fetchedUser.isEmpty()).isTrue();
     }
 
     @Test
