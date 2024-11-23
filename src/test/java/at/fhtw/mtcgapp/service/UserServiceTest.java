@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Base64;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -23,10 +25,11 @@ public class UserServiceTest {
     private UserService userService;
     @Mock
     private UserRepository userRepository;
+    private Base64.Encoder encoder = Base64.getEncoder();
 
     @BeforeEach
     void setUp(){
-        userService = new UserService(userRepository, Validation.buildDefaultValidatorFactory().getValidator());
+        userService = new UserService(userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
     }
 
     @Test

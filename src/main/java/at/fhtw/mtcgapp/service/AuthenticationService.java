@@ -12,6 +12,7 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Base64;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class AuthenticationService {
     private final SessionRepository sessionRepository;
     private final UserRepository userRepository;
     private final Validator validator;
+    private final Base64.Encoder encoder;
 
     public String loginUser(LoginCommand command) {
         log.info("Trying to authenticate user with command {}", command);
@@ -32,7 +34,7 @@ public class AuthenticationService {
         }
 
         User user = userRepository.findByUsername(command.username()).orElseThrow(AuthenticationAccessDeniedException::wrongCredentials);
-        if (!user.getPassword().equals(command.password())) {
+        if (!user.getPassword().equals(encoder.encodeToString(command.password().getBytes()))) {
             throw AuthenticationAccessDeniedException.wrongCredentials();
         }
 

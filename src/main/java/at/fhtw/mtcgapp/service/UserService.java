@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final Validator validator;
+    private final Base64.Encoder encoder;
 
     public UserDto createUser(CreateUserCommand command) {
         log.info("Trying to create user with command {}", command);
@@ -39,7 +41,7 @@ public class UserService {
         User user = User.builder()
                 .token(UUID.randomUUID())
                 .username(command.username())
-                .password(command.password())
+                .password(encoder.encodeToString(command.password().getBytes()))
                 .bio("")
                 .image("")
                 .elo(0)

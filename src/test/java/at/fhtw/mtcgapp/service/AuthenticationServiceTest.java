@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,10 +30,11 @@ public class AuthenticationServiceTest {
     private UserRepository userRepository;
     @Mock
     private SessionRepository sessionRepository;
+    private Base64.Encoder encoder = Base64.getEncoder();
 
     @BeforeEach
     void setUp() {
-        authenticationService = new AuthenticationService(sessionRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator());
+        authenticationService = new AuthenticationService(sessionRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
     }
 
     @Test
@@ -46,7 +48,7 @@ public class AuthenticationServiceTest {
         User user = User.builder()
                 .token(UUID.randomUUID())
                 .username(command.username())
-                .password(command.password())
+                .password(encoder.encodeToString(command.password().getBytes()))
                 .bio("")
                 .image("")
                 .elo(0)
@@ -90,7 +92,7 @@ public class AuthenticationServiceTest {
         User user = User.builder()
                 .token(UUID.randomUUID())
                 .username(command.username())
-                .password(command.password())
+                .password(encoder.encodeToString(command.password().getBytes()))
                 .bio("")
                 .image("")
                 .elo(0)
@@ -117,7 +119,7 @@ public class AuthenticationServiceTest {
         User user = User.builder()
                 .token(UUID.randomUUID())
                 .username(command.username())
-                .password("Password")
+                .password(encoder.encodeToString("Password".getBytes()))
                 .bio("")
                 .image("")
                 .elo(0)

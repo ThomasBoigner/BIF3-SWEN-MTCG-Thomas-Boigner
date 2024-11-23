@@ -17,6 +17,7 @@ import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Base64;
 
 @Slf4j
 public class Main {
@@ -34,12 +35,13 @@ public class Main {
         ObjectMapper objectMapper = new ObjectMapper();
         UnitOfWork unitOfWork = new UnitOfWork();
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Base64.Encoder encoder = Base64.getEncoder();
 
         UserRepository userRepository = new UserRepositoryImpl(unitOfWork);
         SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork);
 
-        router.addService("/users", new UserController(new UserService(userRepository, validator), objectMapper));
-        router.addService("/sessions", new AuthenticationController(new AuthenticationService(sessionRepository, userRepository, validator), objectMapper));
+        router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
+        router.addService("/sessions", new AuthenticationController(new AuthenticationService(sessionRepository, userRepository, validator, encoder), objectMapper));
 
         return router;
     }
