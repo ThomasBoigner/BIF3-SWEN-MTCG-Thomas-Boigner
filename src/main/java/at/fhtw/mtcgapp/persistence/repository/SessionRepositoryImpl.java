@@ -62,6 +62,19 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public void deleteByToken(String token) {
+        log.debug("Trying to delete session with token {}", token);
+        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                DELETE FROM mtcg.session
+                WHERE token = ?
+                """)) {
+            preparedStatement.setString(1, token);
 
+            preparedStatement.execute();
+            unitOfWork.commitTransaction();
+        }
+        catch (SQLException e) {
+            log.error("Could not delete session due to a sql exception");
+            throw new DataAccessException("Delete session failed!", e);
+        }
     }
 }
