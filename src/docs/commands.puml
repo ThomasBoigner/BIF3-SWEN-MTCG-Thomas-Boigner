@@ -6,6 +6,11 @@ class CreateUserCommand {
     password: String
 }
 
+class LoginCommand {
+    username: String
+    password: String
+}
+
 class AuthenticationCommand {
     username: String
     password: String

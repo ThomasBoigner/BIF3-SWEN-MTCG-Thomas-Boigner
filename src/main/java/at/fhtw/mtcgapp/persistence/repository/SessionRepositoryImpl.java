@@ -1,5 +1,6 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
+import at.fhtw.mtcgapp.model.Session;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.DataAccessException;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
@@ -16,18 +17,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 
 @Slf4j
-public class UserRepositoryImpl implements UserRepository {
+public class SessionRepositoryImpl implements SessionRepository {
     private final UnitOfWork unitOfWork;
 
     @Override
-    public Optional<User> findByUsername(String username) {
-        log.debug("Trying to find user with username: {}", username);
+    public Optional<User> findUserByToken(String token) {
+        log.debug("Trying to find user with auth token {}", token);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                Select *
-                From mtcg.user
-                where username = ?
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".battles_fought, "user".coins
+                FROM mtcg.session inner join mtcg.user on "session".fk_user_id = "user".id
+                WHERE session.token = ?
                 """)) {
-            preparedStatement.setString(1, username);
+            preparedStatement.setString(1, token);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             User user = null;
@@ -50,58 +51,68 @@ public class UserRepositoryImpl implements UserRepository {
 
             return Optional.ofNullable(user);
         } catch (SQLException e) {
-            log.error("Could not find user due to a sql exception");
+            log.error("Could not find user of session due to a sql exception");
             throw new DataAccessException("Select failed!", e);
         }
     }
 
     @Override
-    public User save(User user) {
-        log.debug("Trying to save user {}", user);
+    public Session save(Session session) {
+        log.debug("Trying to create session {}", session);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, battles_fought)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO mtcg.session (token, fk_user_id)
+                VALUES (?, ?)
                 """)) {
-            preparedStatement.setObject(1, user.getToken());
-            preparedStatement.setString(2, user.getUsername());
-            preparedStatement.setString(3, user.getPassword());
-            preparedStatement.setString(4, user.getBio());
-            preparedStatement.setString(5, user.getImage());
-            preparedStatement.setInt(6, user.getCoins());
-            preparedStatement.setInt(7, user.getElo());
-            preparedStatement.setInt(8, user.getBattlesFought());
+            preparedStatement.setString(1, session.getToken());
+            preparedStatement.setLong(2, session.getUser().getId());
 
             preparedStatement.execute();
             unitOfWork.commitTransaction();
-            return user;
+            return session;
         } catch (SQLException e) {
             unitOfWork.rollbackTransaction();
-            log.error("Could not create user due to a sql exception");
+            log.error("Could not create session due to a sql exception");
             throw new DataAccessException("Insert into failed!", e);
         }
     }
 
     @Override
-    public boolean existsByUsername(String username) {
-        log.debug("Trying to evaluate if user with username {} already exists", username);
+    public boolean existsByToken(String token) {
+        log.debug("Trying to evaluate if session with token {} already exists", token);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                Select EXISTS (
-                    SELECT username
-                    FROM mtcg.user
-                    WHERE username = ?
+                SELECT EXISTS(
+                    SELECT token
+                    FROM mtcg.session
+                    WHERE token = ?
                 )
                 """)) {
-            preparedStatement.setString(1, username);
+            preparedStatement.setString(1, token);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             resultSet.next();
             boolean exists = resultSet.getBoolean(1);
-            log.debug(exists ? "User with username {} does exist" : " User with username {} does not exist", username);
+            log.debug(exists ? "Session with token {} does exist" : " Session with token {} does not exist", token);
             return exists;
-
         } catch (SQLException e) {
-            log.error("Could not evaluate if user exists due to a sql exception");
+            log.error("Could not evaluate if session exists due to a sql exception");
             throw new DataAccessException("Exists failed!", e);
+        }
+    }
+
+    @Override
+    public void deleteByToken(String token) {
+        log.debug("Trying to delete session with token {}", token);
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                DELETE FROM mtcg.session
+                WHERE token = ?
+                """)) {
+            preparedStatement.setString(1, token);
+
+            preparedStatement.execute();
+            unitOfWork.commitTransaction();
+        } catch (SQLException e) {
+            log.error("Could not delete session due to a sql exception");
+            throw new DataAccessException("Delete session failed!", e);
         }
     }
 }

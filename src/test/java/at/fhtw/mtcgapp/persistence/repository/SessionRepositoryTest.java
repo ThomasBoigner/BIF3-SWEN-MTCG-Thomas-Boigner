@@ -1,5 +1,6 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
+import at.fhtw.mtcgapp.model.Session;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -23,7 +24,7 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-public class UserRepositoryTest {
+public class SessionRepositoryTest {
 
     Consumer<CreateContainerCmd> cmd = e -> e.withPortBindings(new PortBinding(Ports.Binding.bindPort(5432), new ExposedPort(5432)));
     @Container
@@ -36,108 +37,151 @@ public class UserRepositoryTest {
                     entry("POSTGRES_PASSWORD", "mtcgdb")
             ));
 
+    private SessionRepository sessionRepository;
     private UserRepository userRepository;
 
     @BeforeEach
-    void beforeEach() {
-        userRepository = new UserRepositoryImpl(new UnitOfWork());
+    void setUp() {
+        UnitOfWork unitOfWork = new UnitOfWork();
+        userRepository = new UserRepositoryImpl(unitOfWork);
+        sessionRepository = new SessionRepositoryImpl(unitOfWork);
     }
 
     @Test
-    void ensureFindByUsernameWorksProperly() {
+    void ensureFindUserByTokenWorksProperly(){
         // Given
         User user = User.builder()
-                .id(0)
                 .token(UUID.randomUUID())
                 .username("Thomas")
-                .password("pwd")
-                .bio("bio")
-                .image("image")
-                .coins(20)
+                .password("Password")
+                .bio("")
+                .image("")
                 .elo(0)
                 .battlesFought(0)
+                .coins(20)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
+                .build();
+
+        Session session = Session.builder()
+                .token("Thomas-mtcgToken")
+                .user(user)
+                .build();
+
+        userRepository.save(user);
+        user.setId(1);
+        sessionRepository.save(session);
+
+        // When
+        Optional<User> returned = sessionRepository.findUserByToken(session.getToken());
+
+        // Then
+        assertThat(returned.isPresent()).isTrue();
+        assertThat(returned.get()).isEqualTo(user);
+    }
+
+    @Test
+    void ensureFindUserByTokenReturnsEmptyOptionalIfUserCanNotBeFound() {
+        // When
+        Optional<User> returned = sessionRepository.findUserByToken("Thomas-mtcgToken");
+
+        // Then
+        assertThat(returned.isEmpty()).isTrue();
+    }
+
+    @Test
+    void ensureSaveSessionWorksProperly(){
+        // Given
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("Password")
+                .bio("")
+                .image("")
+                .elo(0)
+                .battlesFought(0)
+                .coins(20)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Session session = Session.builder()
+                .token("Thomas-mtcgToken")
+                .user(user)
                 .build();
 
         userRepository.save(user);
         user.setId(1);
 
         // When
-        Optional<User> fetchedUser = userRepository.findByUsername(user.getUsername());
+        Session returned = sessionRepository.save(session);
 
         // Then
-        assertThat(fetchedUser.isPresent()).isTrue();
-        assertThat(fetchedUser.get()).isEqualTo(user);
-    }
-
-    @Test
-    void ensureFindByUsernameReturnsEmptyOptional() {
-        // When
-        Optional<User> fetchedUser = userRepository.findByUsername("Thomas");
-
-        // Then
-        assertThat(fetchedUser.isEmpty()).isTrue();
-    }
-
-    @Test
-    void ensureSaveUserWorksProperly(){
-        // Given
-        User user = User.builder()
-                .id(0)
-                .token(UUID.randomUUID())
-                .username("Thomas")
-                .password("pwd")
-                .bio("bio")
-                .image("image")
-                .coins(20)
-                .elo(0)
-                .battlesFought(0)
-                .deck(new ArrayList<>())
-                .stack(new ArrayList<>())
-                .trades(new ArrayList<>())
-                .build();
-
-        // When
-        User returned = userRepository.save(user);
-
-        // Then
-        assertThat(returned).isEqualTo(user);
+        assertThat(returned).isEqualTo(session);
     }
 
     @Test
     void ensureExistsByUsernameReturnsTrue(){
         // Given
         User user = User.builder()
-                .id(0)
                 .token(UUID.randomUUID())
                 .username("Thomas")
-                .password("pwd")
-                .bio("bio")
-                .image("image")
-                .coins(20)
+                .password("Password")
+                .bio("")
+                .image("")
                 .elo(0)
                 .battlesFought(0)
+                .coins(20)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
                 .build();
+
+        Session session = Session.builder()
+                .token("Thomas-mtcgToken")
+                .user(user)
+                .build();
+
         userRepository.save(user);
+        user.setId(1);
+        sessionRepository.save(session);
 
         // When
-        boolean exists = userRepository.existsByUsername(user.getUsername());
+        boolean exists = sessionRepository.existsByToken("Thomas-mtcgToken");
 
         // Then
         assertThat(exists).isTrue();
     }
 
     @Test
-    void ensureExistsByUsernameReturnsFalse(){
-        // When
-        boolean exists = userRepository.existsByUsername("username");
+    void ensureDeleteByTokenWorksProperly(){
+        // Given
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("Password")
+                .bio("")
+                .image("")
+                .elo(0)
+                .battlesFought(0)
+                .coins(20)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
 
-        // Then
-        assertThat(exists).isFalse();
+        Session session = Session.builder()
+                .token("Thomas-mtcgToken")
+                .user(user)
+                .build();
+
+        userRepository.save(user);
+        user.setId(1);
+        sessionRepository.save(session);
+
+        // When
+        sessionRepository.deleteByToken(session.getToken());
     }
 }

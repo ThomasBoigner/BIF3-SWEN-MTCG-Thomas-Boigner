@@ -67,7 +67,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void ensureCreateUserReturnsStatus400WhenCommandCanNotBeParsed() throws JsonProcessingException {
+    void ensureCreateUserReturnsStatus400WhenCommandCanNotBeParsed() {
         // Given
         Request request = Request.builder()
                 .method(Method.POST)
@@ -83,7 +83,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void ensureCreateUserReturnsStatus400WhenBodyIsNull() throws JsonProcessingException {
+    void ensureCreateUserReturnsStatus400WhenBodyIsNull() {
         // Given
         Request request = Request.builder()
                 .method(Method.POST)

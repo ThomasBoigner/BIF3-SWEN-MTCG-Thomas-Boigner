@@ -25,7 +25,7 @@ public class UserController extends AbstractController {
 
     @Override
     public Response handleRequest(Request request) {
-        if (request.getMethod() == Method.POST) {
+        if (request.getMethod() == Method.POST && request.getPathname().equals("/users")) {
             return handleServiceErrors(request, this::createUser);
         }
 
@@ -50,11 +50,9 @@ public class UserController extends AbstractController {
             log.warn("Could not deserialize the create user command {}!", request.getBody());
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        log.debug("{}", command);
 
         UserDto userDto = userService.createUser(command);
 
-        log.debug("{}", userDto);
         String json;
         try {
             json = objectMapper.writeValueAsString(userDto);
