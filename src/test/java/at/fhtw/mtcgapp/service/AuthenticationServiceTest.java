@@ -4,7 +4,7 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.SessionRepository;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.LoginCommand;
-import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedDeniedException;
+import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +36,42 @@ public class AuthenticationServiceTest {
     @BeforeEach
     void setUp() {
         authenticationService = new AuthenticationService(sessionRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
+    }
+
+    @Test
+    void ensureGetCurrentlyLoggedInUserWorksProperly() {
+        // Given
+        String token = "Thomas-mtcgToken";
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password(encoder.encodeToString("Password".getBytes()))
+                .bio("")
+                .image("")
+                .elo(0)
+                .battlesFought(0)
+                .coins(20)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        when(sessionRepository.findUserByToken(eq(token))).thenReturn(Optional.of(user));
+
+        // When
+        User returned = authenticationService.getCurrentlyLoggedInUser(token);
+
+        // Then
+        assertThat(returned).isEqualTo(user);
+    }
+
+    @Test
+    void ensureGetCurrentlyLoggedInUserThrowsUnauthorizedExceptionWhenUserCanNotBeFound() {
+        // Given
+        String token = "Thomas-mtcgToken";
+        when(sessionRepository.findUserByToken(eq(token))).thenReturn(Optional.empty());
+
+        // When
+        assertThrows(AuthenticationUnauthorizedException.class, () -> authenticationService.getCurrentlyLoggedInUser(token));
     }
 
     @Test
@@ -107,8 +143,9 @@ public class AuthenticationServiceTest {
         when(userRepository.findByUsername(eq(command.username()))).thenReturn(Optional.empty());
 
         // Assert
-        assertThrows(AuthenticationUnauthorizedDeniedException.class, () -> authenticationService.loginUser(command));
+        assertThrows(AuthenticationUnauthorizedException.class, () -> authenticationService.loginUser(command));
     }
+
     @Test
     void ensureLoginUserThrowsUnauthorizedExceptionWhenPasswordDoesNotMatch() {
         // Given
@@ -134,7 +171,7 @@ public class AuthenticationServiceTest {
         when(userRepository.findByUsername(eq(command.username()))).thenReturn(Optional.of(user));
 
         // Assert
-        assertThrows(AuthenticationUnauthorizedDeniedException.class, () -> authenticationService.loginUser(command));
+        assertThrows(AuthenticationUnauthorizedException.class, () -> authenticationService.loginUser(command));
     }
 
     @Test

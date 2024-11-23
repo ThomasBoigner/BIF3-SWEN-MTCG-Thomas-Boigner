@@ -5,7 +5,7 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.SessionRepository;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.LoginCommand;
-import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedDeniedException;
+import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -24,6 +24,13 @@ public class AuthenticationService {
     private final Validator validator;
     private final Base64.Encoder encoder;
 
+    public User getCurrentlyLoggedInUser(String token) {
+        log.debug("Trying to get the currently logged in user");
+        User user = sessionRepository.findUserByToken(token).orElseThrow(AuthenticationUnauthorizedException::invalidToken);
+        log.info("User {} is currently logged in", user);
+        return user;
+    }
+
     public String loginUser(LoginCommand command) {
         log.debug("Trying to authenticate user with command {}", command);
 
@@ -33,9 +40,9 @@ public class AuthenticationService {
             throw new ConstraintViolationException(violations);
         }
 
-        User user = userRepository.findByUsername(command.username()).orElseThrow(AuthenticationUnauthorizedDeniedException::wrongCredentials);
+        User user = userRepository.findByUsername(command.username()).orElseThrow(AuthenticationUnauthorizedException::wrongCredentials);
         if (!user.getPassword().equals(encoder.encodeToString(command.password().getBytes()))) {
-            throw AuthenticationUnauthorizedDeniedException.wrongCredentials();
+            throw AuthenticationUnauthorizedException.wrongCredentials();
         }
 
         String token = String.format("%s-mtcgToken", user.getUsername());

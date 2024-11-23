@@ -1,6 +1,7 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
 import at.fhtw.mtcgapp.model.Session;
+import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.DataAccessException;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +10,18 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 
 @Slf4j
 public class SessionRepositoryImpl implements SessionRepository {
     private final UnitOfWork unitOfWork;
+
+    @Override
+    public Optional<User> findUserByToken(String token) {
+        return Optional.empty();
+    }
 
     @Override
     public Session save(Session session) {
