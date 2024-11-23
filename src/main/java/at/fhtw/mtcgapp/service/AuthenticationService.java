@@ -37,11 +37,15 @@ public class AuthenticationService {
         }
 
         String token = String.format("%s-mtcgToken", user.getUsername());
-        Session session = Session.builder()
-                .token(token)
-                .user(user)
-                .build();
-        sessionRepository.save(session);
+
+        if (!sessionRepository.existsByToken(token)) {
+            log.debug("Save Session, because it has not been saved yet");
+            Session session = Session.builder()
+                    .token(token)
+                    .user(user)
+                    .build();
+            sessionRepository.save(session);
+        }
 
         log.debug("Authentication of user {} was successful", user);
         return token;

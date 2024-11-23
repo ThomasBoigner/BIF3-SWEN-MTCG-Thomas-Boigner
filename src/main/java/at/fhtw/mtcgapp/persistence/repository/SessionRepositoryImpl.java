@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @RequiredArgsConstructor
@@ -32,6 +33,30 @@ public class SessionRepositoryImpl implements SessionRepository {
             unitOfWork.rollbackTransaction();
             log.error("Could not create session due to a sql exception");
             throw new DataAccessException("Insert into failed!", e);
+        }
+    }
+
+    @Override
+    public boolean existsByToken(String token) {
+        log.debug("Trying to evaluate if session with token {} already exists", token);
+        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT EXISTS(
+                    SELECT token
+                    FROM mtcg.session
+                    WHERE token = ?
+                )
+                """)) {
+            preparedStatement.setString(1, token);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            resultSet.next();
+            boolean exists = resultSet.getBoolean(1);
+            log.debug(exists ? "Session with token {} does exist" : " Session with token {} does not exist", token);
+            return exists;
+        }
+        catch (SQLException e) {
+            log.error("Could not evaluate if session exists due to a sql exception");
+            throw new DataAccessException("Exists failed!", e);
         }
     }
 

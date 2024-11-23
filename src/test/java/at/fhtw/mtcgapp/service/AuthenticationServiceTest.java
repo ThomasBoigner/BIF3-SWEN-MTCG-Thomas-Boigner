@@ -58,6 +58,7 @@ public class AuthenticationServiceTest {
                 .build();
 
         when(userRepository.findByUsername(eq(command.username()))).thenReturn(Optional.of(user));
+        when(sessionRepository.existsByToken(eq("Thomas-mtcgToken"))).thenReturn(false);
 
         // When
         String token = authenticationService.loginUser(command);

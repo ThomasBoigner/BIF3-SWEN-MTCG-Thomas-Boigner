@@ -28,7 +28,8 @@ public enum DatabaseManager {
                             image character varying(8) COLLATE pg_catalog."default",
                             coins integer,
                             elo integer,
-                            battles_fought integer
+                            battles_fought integer,
+                            UNIQUE (username)
                         )
                     """);
             connection.createStatement().execute("ALTER TABLE IF EXISTS mtcg.user OWNER to mtcgdb;");
@@ -40,6 +41,7 @@ public enum DatabaseManager {
                         token character varying(64) NOT NULL,
                         fk_user_id bigint,
                         PRIMARY KEY (id),
+                        UNIQUE (token),
                         CONSTRAINT fk_user_id FOREIGN KEY (fk_user_id)
                             REFERENCES mtcg."user" (id) MATCH SIMPLE
                             ON UPDATE NO ACTION

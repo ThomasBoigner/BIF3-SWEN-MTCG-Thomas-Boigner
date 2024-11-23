@@ -77,4 +77,36 @@ public class SessionRepositoryTest {
         // Then
         assertThat(returned).isEqualTo(session);
     }
+    @Test
+    void ensureExistsByUsernameReturnsTrue(){
+        // Given
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("Password")
+                .bio("")
+                .image("")
+                .elo(0)
+                .battlesFought(0)
+                .coins(20)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Session session = Session.builder()
+                .token("Thomas-mtcgToken")
+                .user(user)
+                .build();
+
+        userRepository.save(user);
+        user.setId(1);
+        Session returned = sessionRepository.save(session);
+
+        // When
+        boolean exists = sessionRepository.existsByToken("Thomas-mtcgToken");
+
+        // Then
+        assertThat(exists).isTrue();
+    }
 }
