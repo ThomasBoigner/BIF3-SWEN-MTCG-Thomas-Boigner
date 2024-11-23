@@ -25,7 +25,7 @@ public class AuthenticationService {
     private final Base64.Encoder encoder;
 
     public String loginUser(LoginCommand command) {
-        log.info("Trying to authenticate user with command {}", command);
+        log.debug("Trying to authenticate user with command {}", command);
 
         Set<ConstraintViolation<LoginCommand>> violations = validator.validate(command);
         if (!violations.isEmpty()) {
@@ -49,11 +49,13 @@ public class AuthenticationService {
             sessionRepository.save(session);
         }
 
-        log.debug("Authentication of user {} was successful", user);
+        log.info("Authentication of user {} was successful", user);
         return token;
     }
 
     public void logoutUser(String token) {
-
+        log.debug("Trying to logout user with token {}", token);
+        sessionRepository.deleteByToken(token);
+        log.info("Logged out user with token {}", token);
     }
 }

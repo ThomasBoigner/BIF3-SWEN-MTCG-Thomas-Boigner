@@ -25,7 +25,7 @@ public class UserService {
     private final Base64.Encoder encoder;
 
     public UserDto createUser(CreateUserCommand command) {
-        log.info("Trying to create user with command {}", command);
+        log.debug("Trying to create user with command {}", command);
 
         Set<ConstraintViolation<CreateUserCommand>> violations = validator.validate(command);
         if (!violations.isEmpty()) {
