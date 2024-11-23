@@ -9,12 +9,18 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 
 @Slf4j
 public class UserRepositoryImpl implements UserRepository {
     private final UnitOfWork unitOfWork;
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return Optional.empty();
+    }
 
     @Override
     public User save(User user) {

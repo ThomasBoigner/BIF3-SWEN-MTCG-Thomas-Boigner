@@ -5,6 +5,7 @@ import at.fhtw.httpserver.http.HttpStatus;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.httpserver.server.RestController;
+import at.fhtw.mtcgapp.service.exception.AccessDeniedException;
 import at.fhtw.mtcgapp.service.exception.ValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -28,6 +29,9 @@ public abstract class AbstractController implements RestController {
         }
         catch (IllegalArgumentException | ValidationException | NullPointerException e) {
             return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, e.getMessage());
+        }
+        catch (AccessDeniedException e) {
+            return new Response(HttpStatus.FORBIDDEN, ContentType.JSON, e.getMessage());
         }
         catch (Exception e) {
             log.error(e.getMessage(), e);
