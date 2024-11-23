@@ -4,7 +4,7 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.SessionRepository;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.LoginCommand;
-import at.fhtw.mtcgapp.service.exception.AuthenticationAccessDeniedException;
+import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedDeniedException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +82,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    void ensureLoginUserThrowsAccessDeniedExceptionWhenUserCanNotBeFound() {
+    void ensureLoginUserThrowsUnauthorizedExceptionWhenUserCanNotBeFound() {
         // Given
         LoginCommand command = LoginCommand.builder()
                 .username("Thomas")
@@ -106,10 +106,10 @@ public class AuthenticationServiceTest {
         when(userRepository.findByUsername(eq(command.username()))).thenReturn(Optional.empty());
 
         // Assert
-        assertThrows(AuthenticationAccessDeniedException.class, () -> authenticationService.loginUser(command));
+        assertThrows(AuthenticationUnauthorizedDeniedException.class, () -> authenticationService.loginUser(command));
     }
     @Test
-    void ensureLoginUserThrowsAccessDeniedExceptionWhenPasswordDoesNotMatch() {
+    void ensureLoginUserThrowsUnauthorizedExceptionWhenPasswordDoesNotMatch() {
         // Given
         LoginCommand command = LoginCommand.builder()
                 .username("Thomas")
@@ -133,6 +133,6 @@ public class AuthenticationServiceTest {
         when(userRepository.findByUsername(eq(command.username()))).thenReturn(Optional.of(user));
 
         // Assert
-        assertThrows(AuthenticationAccessDeniedException.class, () -> authenticationService.loginUser(command));
+        assertThrows(AuthenticationUnauthorizedDeniedException.class, () -> authenticationService.loginUser(command));
     }
 }

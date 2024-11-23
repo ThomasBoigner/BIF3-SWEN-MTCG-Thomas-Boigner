@@ -5,7 +5,7 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.SessionRepository;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.LoginCommand;
-import at.fhtw.mtcgapp.service.exception.AuthenticationAccessDeniedException;
+import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedDeniedException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -33,9 +33,9 @@ public class AuthenticationService {
             throw new ConstraintViolationException(violations);
         }
 
-        User user = userRepository.findByUsername(command.username()).orElseThrow(AuthenticationAccessDeniedException::wrongCredentials);
+        User user = userRepository.findByUsername(command.username()).orElseThrow(AuthenticationUnauthorizedDeniedException::wrongCredentials);
         if (!user.getPassword().equals(encoder.encodeToString(command.password().getBytes()))) {
-            throw AuthenticationAccessDeniedException.wrongCredentials();
+            throw AuthenticationUnauthorizedDeniedException.wrongCredentials();
         }
 
         String token = String.format("%s-mtcgToken", user.getUsername());
@@ -51,5 +51,9 @@ public class AuthenticationService {
 
         log.debug("Authentication of user {} was successful", user);
         return token;
+    }
+
+    public void logoutUser(String token) {
+
     }
 }
