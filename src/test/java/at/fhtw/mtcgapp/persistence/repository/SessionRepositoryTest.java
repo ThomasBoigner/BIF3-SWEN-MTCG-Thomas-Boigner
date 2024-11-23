@@ -16,6 +16,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -44,6 +45,49 @@ public class SessionRepositoryTest {
         UnitOfWork unitOfWork = new UnitOfWork();
         userRepository = new UserRepositoryImpl(unitOfWork);
         sessionRepository = new SessionRepositoryImpl(unitOfWork);
+    }
+
+    @Test
+    void ensureFindUserByTokenWorksProperly(){
+        // Given
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("Password")
+                .bio("")
+                .image("")
+                .elo(0)
+                .battlesFought(0)
+                .coins(20)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Session session = Session.builder()
+                .token("Thomas-mtcgToken")
+                .user(user)
+                .build();
+
+        userRepository.save(user);
+        user.setId(1);
+        sessionRepository.save(session);
+
+        // When
+        Optional<User> returned = sessionRepository.findUserByToken(session.getToken());
+
+        // Then
+        assertThat(returned.isPresent()).isTrue();
+        assertThat(returned.get()).isEqualTo(user);
+    }
+
+    @Test
+    void ensureFindUserByTokenReturnsEmptyOptionalIfUserCanNotBeFound() {
+        // When
+        Optional<User> returned = sessionRepository.findUserByToken("Thomas-mtcgToken");
+
+        // Then
+        assertThat(returned.isEmpty()).isTrue();
     }
 
     @Test

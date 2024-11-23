@@ -10,7 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 
@@ -20,7 +22,38 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public Optional<User> findUserByToken(String token) {
-        return Optional.empty();
+        log.debug("Trying to find user with auth token {}", token);
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".battles_fought, "user".coins
+                FROM mtcg.session inner join mtcg.user on "session".fk_user_id = "user".id
+                WHERE session.token = ?
+                """)) {
+            preparedStatement.setString(1, token);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            User user = null;
+            while (resultSet.next()) {
+                user = User.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .username(resultSet.getString("username"))
+                        .password(resultSet.getString("password"))
+                        .bio(resultSet.getString("bio"))
+                        .image(resultSet.getString("image"))
+                        .elo(resultSet.getInt("elo"))
+                        .battlesFought(resultSet.getInt("battles_fought"))
+                        .coins(resultSet.getInt("coins"))
+                        .deck(new ArrayList<>())
+                        .stack(new ArrayList<>())
+                        .trades(new ArrayList<>())
+                        .build();
+            }
+
+            return Optional.ofNullable(user);
+        } catch (SQLException e) {
+            log.error("Could not find user of session due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
     }
 
     @Override
@@ -46,7 +79,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public boolean existsByToken(String token) {
         log.debug("Trying to evaluate if session with token {} already exists", token);
-        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 SELECT EXISTS(
                     SELECT token
                     FROM mtcg.session
@@ -60,8 +93,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             boolean exists = resultSet.getBoolean(1);
             log.debug(exists ? "Session with token {} does exist" : " Session with token {} does not exist", token);
             return exists;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             log.error("Could not evaluate if session exists due to a sql exception");
             throw new DataAccessException("Exists failed!", e);
         }
@@ -70,7 +102,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public void deleteByToken(String token) {
         log.debug("Trying to delete session with token {}", token);
-        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 DELETE FROM mtcg.session
                 WHERE token = ?
                 """)) {
@@ -78,8 +110,7 @@ public class SessionRepositoryImpl implements SessionRepository {
 
             preparedStatement.execute();
             unitOfWork.commitTransaction();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             log.error("Could not delete session due to a sql exception");
             throw new DataAccessException("Delete session failed!", e);
         }

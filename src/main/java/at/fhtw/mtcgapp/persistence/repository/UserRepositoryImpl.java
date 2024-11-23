@@ -22,16 +22,16 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> findByUsername(String username) {
         log.debug("Trying to find user with username: {}", username);
-        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 Select *
                 From mtcg.user
                 where username = ?
                 """)) {
             preparedStatement.setString(1, username);
             ResultSet resultSet = preparedStatement.executeQuery();
+
             User user = null;
-            while(resultSet.next())
-            {
+            while (resultSet.next()) {
                 user = User.builder()
                         .id(resultSet.getLong("id"))
                         .token(UUID.fromString(resultSet.getString("token")))
@@ -47,6 +47,7 @@ public class UserRepositoryImpl implements UserRepository {
                         .trades(new ArrayList<>())
                         .build();
             }
+
             return Optional.ofNullable(user);
         } catch (SQLException e) {
             log.error("Could not find user due to a sql exception");
@@ -57,7 +58,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User save(User user) {
         log.debug("Trying to save user {}", user);
-        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, battles_fought)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """)) {
@@ -83,7 +84,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean existsByUsername(String username) {
         log.debug("Trying to evaluate if user with username {} already exists", username);
-        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 Select EXISTS (
                     SELECT username
                     FROM mtcg.user
