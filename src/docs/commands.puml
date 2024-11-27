@@ -16,7 +16,7 @@ class AuthenticationCommand {
     password: String
 }
 
-class CreatePackageCommand {
+class CreateCardCommand {
     id: UUID
     name: String
     damage: double

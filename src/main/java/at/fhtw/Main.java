@@ -8,8 +8,10 @@ import at.fhtw.mtcgapp.persistence.repository.SessionRepositoryImpl;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.persistence.repository.UserRepositoryImpl;
 import at.fhtw.mtcgapp.presentation.AuthenticationController;
+import at.fhtw.mtcgapp.presentation.PackageController;
 import at.fhtw.mtcgapp.presentation.UserController;
 import at.fhtw.mtcgapp.service.AuthenticationService;
+import at.fhtw.mtcgapp.service.PackageService;
 import at.fhtw.mtcgapp.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
@@ -42,6 +44,7 @@ public class Main {
 
         router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(new AuthenticationService(sessionRepository, userRepository, validator, encoder), objectMapper));
+        router.addService("/packages", new PackageController(new PackageService(validator), objectMapper));
 
         return router;
     }
