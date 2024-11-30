@@ -1,6 +1,7 @@
 package at.fhtw.mtcgapp.model;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
@@ -8,7 +9,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class SpellCard extends Card {
     private double criticalHitChance;
 }

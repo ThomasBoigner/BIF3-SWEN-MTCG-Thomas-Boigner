@@ -27,7 +27,7 @@ public class PackageController extends AbstractController {
     @Override
     public Response handleRequest(Request request) {
         if (request.getMethod() == Method.POST && request.getPathname().equals("/packages")) {
-            return handleServiceErrors(request, this::createUser);
+            return handleServiceErrors(request, this::createPackage);
         }
 
         return new Response(
@@ -37,7 +37,7 @@ public class PackageController extends AbstractController {
         );
     }
 
-    private Response createUser(Request request) {
+    private Response createPackage(Request request) {
         log.debug("Incoming http POST request {}", request);
         Objects.requireNonNull(request.getBody(), "Body must not be null!");
 
@@ -53,7 +53,7 @@ public class PackageController extends AbstractController {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        PackageDto packageDto = packageService.createPackage(commands);
+        PackageDto packageDto = packageService.createPackage(extractAuthToken(request.getHeaderMap()), commands);
 
         String json;
         try {

@@ -3,7 +3,6 @@ package at.fhtw.mtcgapp.presentation;
 import at.fhtw.httpserver.http.ContentType;
 import at.fhtw.httpserver.http.HttpStatus;
 import at.fhtw.httpserver.http.Method;
-import at.fhtw.httpserver.server.HeaderMap;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.mtcgapp.service.AuthenticationService;
@@ -63,11 +62,7 @@ public class AuthenticationController extends AbstractController{
     private Response logout(Request request) {
         log.debug("Incoming http GET logout user request {}", request);
 
-        if (request.getHeaderMap() == null || request.getHeaderMap().getHeader("Authorization") == null) {
-            return new Response(HttpStatus.UNAUTHORIZED);
-        }
-
-        authenticationService.logoutUser(request.getHeaderMap().getHeader("Authorization").replace("Bearer ", ""));
+        authenticationService.logoutUser(extractAuthToken(request.getHeaderMap()));
         return new Response(HttpStatus.OK);
     }
 }

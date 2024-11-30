@@ -2,9 +2,11 @@ package at.fhtw.mtcgapp.presentation;
 
 import at.fhtw.httpserver.http.ContentType;
 import at.fhtw.httpserver.http.HttpStatus;
+import at.fhtw.httpserver.server.HeaderMap;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.httpserver.server.RestController;
+import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
 import at.fhtw.mtcgapp.service.exception.UnauthorizedException;
 import at.fhtw.mtcgapp.service.exception.ValidationException;
 import jakarta.validation.ConstraintViolation;
@@ -41,5 +43,12 @@ public abstract class AbstractController implements RestController {
             log.error(e.getMessage(), e);
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    protected String extractAuthToken(HeaderMap headerMap) {
+        if (headerMap == null || headerMap.getHeader("Authorization") == null) {
+            throw AuthenticationUnauthorizedException.noTokenProvided();
+        }
+        return headerMap.getHeader("Authorization").replace("Bearer ", "");
     }
 }

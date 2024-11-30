@@ -10,8 +10,8 @@ import java.util.UUID;
 @Slf4j
 @Builder
 public record PackageDto(UUID id, int price, List<CardDto> cards) {
-    public PackageDto(Package _package) {
-        this(_package.getToken(), _package.getPrice(), _package.getCards().stream().map(CardDto::new).toList());
+    public PackageDto(Package pkg) {
+        this(pkg.getToken(), pkg.getPrice(), pkg.getCards().stream().map(CardDto::new).toList());
         log.debug("Created PackageDto {}", this);
     }
 }

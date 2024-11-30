@@ -1,6 +1,7 @@
 package at.fhtw.mtcgapp.presentation;
 
 import at.fhtw.httpserver.http.Method;
+import at.fhtw.httpserver.server.HeaderMap;
 import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.mtcgapp.service.PackageService;
@@ -38,6 +39,9 @@ public class PackageControllerTest {
     @Test
     void ensureCreatePackageWorksProperly() throws JsonProcessingException {
         // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtgcToken");
+
         CreateCardCommand createCardCommand1 = CreateCardCommand.builder()
                 .id(UUID.randomUUID())
                 .name("test1")
@@ -52,6 +56,7 @@ public class PackageControllerTest {
 
         Request request = Request.builder()
                 .method(Method.POST)
+                .headerMap(headerMap)
                 .pathname("/packages")
                 .body(objectMapper.writeValueAsString(List.of(createCardCommand1, createCardCommand2)))
                 .build();
@@ -70,7 +75,7 @@ public class PackageControllerTest {
                                 .damage(createCardCommand2.damage()).build()))
                 .build();
 
-        when(packageService.createPackage(eq(List.of(createCardCommand1, createCardCommand2)))).thenReturn(packageDto);
+        when(packageService.createPackage(eq("Thomas-mtgcToken"), eq(List.of(createCardCommand1, createCardCommand2)))).thenReturn(packageDto);
 
         // When
         Response response = packageController.handleRequest(request);
@@ -86,8 +91,12 @@ public class PackageControllerTest {
     @Test
     void ensureCreatePackageReturnsStatus400WhenCommandCanNotBeParsed() {
         // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtgcToken");
+
         Request request = Request.builder()
                 .method(Method.POST)
+                .headerMap(headerMap)
                 .pathname("/users")
                 .body("")
                 .build();
@@ -102,8 +111,12 @@ public class PackageControllerTest {
     @Test
     void ensureCreatePackageReturnsStatus400WhenBodyIsNull() {
         // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtgcToken");
+
         Request request = Request.builder()
                 .method(Method.POST)
+                .headerMap(headerMap)
                 .pathname("/packages")
                 .body(null)
                 .build();
