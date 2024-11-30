@@ -81,4 +81,39 @@ public class PackageControllerTest {
         assertThat(response.getContentType()).isEqualTo("application/json");
         assertThat(response.getContent()).isEqualTo(objectMapper.writeValueAsString(packageDto));
     }
+
+
+    @Test
+    void ensureCreatePackageReturnsStatus400WhenCommandCanNotBeParsed() {
+        // Given
+        Request request = Request.builder()
+                .method(Method.POST)
+                .pathname("/users")
+                .body("")
+                .build();
+
+        // When
+        Response response = packageController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void ensureCreatePackageReturnsStatus400WhenBodyIsNull() {
+        // Given
+        Request request = Request.builder()
+                .method(Method.POST)
+                .pathname("/packages")
+                .body(null)
+                .build();
+
+        // When
+        Response response = packageController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat(response.getContentType()).isEqualTo("application/json");
+        assertThat(response.getContent()).isEqualTo("Body must not be null!");
+    }
 }
