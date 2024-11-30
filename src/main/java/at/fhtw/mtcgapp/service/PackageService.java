@@ -55,16 +55,16 @@ public class PackageService {
 
             if (command.name().contains("Spell")) {
                 return SpellCard.builder()
-                        .token(UUID.randomUUID())
+                        .token(command.id())
                         .name(command.name())
                         .damage(command.damage())
                         .cardPackage(pkg)
                         .damageType(damageType)
-                        .criticalHitChance(2)
+                        .criticalHitChance(0.2)
                         .build();
             } else {
                 return MonsterCard.builder()
-                        .token(UUID.randomUUID())
+                        .token(command.id())
                         .name(command.name())
                         .damage(command.damage())
                         .cardPackage(pkg)
