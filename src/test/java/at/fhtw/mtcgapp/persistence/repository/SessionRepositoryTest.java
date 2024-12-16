@@ -70,7 +70,6 @@ public class SessionRepositoryTest {
                 .build();
 
         userRepository.save(user);
-        user.setId(1);
         sessionRepository.save(session);
 
         // When
@@ -113,12 +112,12 @@ public class SessionRepositoryTest {
                 .build();
 
         userRepository.save(user);
-        user.setId(1);
 
         // When
         Session returned = sessionRepository.save(session);
 
         // Then
+        assertThat(returned.getId()).isNotZero();
         assertThat(returned).isEqualTo(session);
     }
 
@@ -145,7 +144,6 @@ public class SessionRepositoryTest {
                 .build();
 
         userRepository.save(user);
-        user.setId(1);
         sessionRepository.save(session);
 
         // When
@@ -178,7 +176,6 @@ public class SessionRepositoryTest {
                 .build();
 
         userRepository.save(user);
-        user.setId(1);
         sessionRepository.save(session);
 
         // When

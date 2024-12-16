@@ -3,13 +3,12 @@ package at.fhtw;
 import at.fhtw.httpserver.server.Server;
 import at.fhtw.httpserver.utils.Router;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
-import at.fhtw.mtcgapp.persistence.repository.SessionRepository;
-import at.fhtw.mtcgapp.persistence.repository.SessionRepositoryImpl;
-import at.fhtw.mtcgapp.persistence.repository.UserRepository;
-import at.fhtw.mtcgapp.persistence.repository.UserRepositoryImpl;
+import at.fhtw.mtcgapp.persistence.repository.*;
 import at.fhtw.mtcgapp.presentation.AuthenticationController;
+import at.fhtw.mtcgapp.presentation.PackageController;
 import at.fhtw.mtcgapp.presentation.UserController;
 import at.fhtw.mtcgapp.service.AuthenticationService;
+import at.fhtw.mtcgapp.service.PackageService;
 import at.fhtw.mtcgapp.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
@@ -39,9 +38,12 @@ public class Main {
 
         UserRepository userRepository = new UserRepositoryImpl(unitOfWork);
         SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork);
+        CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
+        PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 
         router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(new AuthenticationService(sessionRepository, userRepository, validator, encoder), objectMapper));
+        router.addService("/packages", new PackageController(new PackageService(packageRepository, validator), objectMapper));
 
         return router;
     }
