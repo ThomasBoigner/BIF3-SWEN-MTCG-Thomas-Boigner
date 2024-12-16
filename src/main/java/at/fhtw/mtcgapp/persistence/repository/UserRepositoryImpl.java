@@ -88,7 +88,7 @@ public class UserRepositoryImpl implements UserRepository {
                 Select EXISTS (
                     SELECT username
                     FROM mtcg.user
-                    WHERE username = ?
+                    WHERE LOWER(username) = LOWER(?)
                 )
                 """)) {
             preparedStatement.setString(1, username);

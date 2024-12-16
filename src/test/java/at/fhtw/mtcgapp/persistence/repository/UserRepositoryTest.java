@@ -133,6 +133,32 @@ public class UserRepositoryTest {
     }
 
     @Test
+    void ensureExistsByUsernameIsCaseInsensitiveReturnsTrue(){
+        // Given
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        userRepository.save(user);
+
+        // When
+        boolean exists = userRepository.existsByUsername("thomas");
+
+        // Then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
     void ensureExistsByUsernameReturnsFalse(){
         // When
         boolean exists = userRepository.existsByUsername("username");
