@@ -62,11 +62,15 @@ public class SessionRepositoryImpl implements SessionRepository {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 INSERT INTO mtcg.session (token, fk_user_id)
                 VALUES (?, ?)
+                RETURNING id;
                 """)) {
             preparedStatement.setString(1, session.getToken());
             preparedStatement.setLong(2, session.getUser().getId());
 
-            preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            session.setId(resultSet.getLong("id"));
+
             unitOfWork.commitTransaction();
             return session;
         } catch (SQLException e) {

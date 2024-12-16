@@ -38,7 +38,8 @@ public class Main {
 
         UserRepository userRepository = new UserRepositoryImpl(unitOfWork);
         SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork);
-        PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork);
+        CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
+        PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 
         router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(new AuthenticationService(sessionRepository, userRepository, validator, encoder), objectMapper));

@@ -44,7 +44,7 @@ public enum DatabaseManager {
                 CREATE TABLE IF NOT EXISTS mtcg.session
                 (
                     id BIGSERIAL PRIMARY KEY,
-                    token uuid NOT NULL,
+                    token character varying(64) NOT NULL,
                     fk_user_id bigint NOT NULL,
                     UNIQUE (token),
                     CONSTRAINT fk_user_id FOREIGN KEY (fk_user_id)

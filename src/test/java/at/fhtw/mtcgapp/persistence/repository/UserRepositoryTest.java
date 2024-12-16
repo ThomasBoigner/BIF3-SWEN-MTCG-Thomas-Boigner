@@ -103,6 +103,7 @@ public class UserRepositoryTest {
         User returned = userRepository.save(user);
 
         // Then
+        assertThat(returned.getId()).isNotZero();
         assertThat(returned).isEqualTo(user);
     }
 

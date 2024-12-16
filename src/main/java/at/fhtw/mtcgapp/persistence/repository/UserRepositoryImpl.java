@@ -61,6 +61,7 @@ public class UserRepositoryImpl implements UserRepository {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, battles_fought)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                RETURNING id;
                 """)) {
             preparedStatement.setObject(1, user.getToken());
             preparedStatement.setString(2, user.getUsername());
@@ -71,8 +72,12 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setInt(7, user.getElo());
             preparedStatement.setInt(8, user.getBattlesFought());
 
-            preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            user.setId(resultSet.getLong("id"));
+
             unitOfWork.commitTransaction();
+
             return user;
         } catch (SQLException e) {
             unitOfWork.rollbackTransaction();
