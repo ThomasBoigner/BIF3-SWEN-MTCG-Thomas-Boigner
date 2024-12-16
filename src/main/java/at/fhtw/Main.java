@@ -6,6 +6,7 @@ import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import at.fhtw.mtcgapp.persistence.repository.*;
 import at.fhtw.mtcgapp.presentation.AuthenticationController;
 import at.fhtw.mtcgapp.presentation.PackageController;
+import at.fhtw.mtcgapp.presentation.TransactionsController;
 import at.fhtw.mtcgapp.presentation.UserController;
 import at.fhtw.mtcgapp.service.AuthenticationService;
 import at.fhtw.mtcgapp.service.PackageService;
@@ -41,9 +42,12 @@ public class Main {
         CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 
+        PackageService packageService = new PackageService(packageRepository, validator);
+
         router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(new AuthenticationService(sessionRepository, userRepository, validator, encoder), objectMapper));
-        router.addService("/packages", new PackageController(new PackageService(packageRepository, validator), objectMapper));
+        router.addService("/packages", new PackageController(packageService, objectMapper));
+        router.addService("/transactions", new TransactionsController(packageService));
 
         return router;
     }

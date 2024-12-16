@@ -79,4 +79,8 @@ public class PackageService {
         log.info("Created package {}", pkg);
         return new PackageDto(packageRepository.save(pkg));
     }
+
+    public void acquirePackage(String authToken) {
+
+    }
 }
