@@ -77,4 +77,9 @@ public class CardRepositoryImpl implements CardRepository {
         }
         throw new IllegalArgumentException("Card type not supported!");
     }
+
+    @Override
+    public Card updateCard(Card card) {
+        throw new UnsupportedOperationException("Not yet implemented!");
+    }
 }

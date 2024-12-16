@@ -2,9 +2,11 @@ package at.fhtw.mtcgapp.service;
 
 import at.fhtw.mtcgapp.model.*;
 import at.fhtw.mtcgapp.model.Package;
+import at.fhtw.mtcgapp.persistence.repository.CardRepository;
 import at.fhtw.mtcgapp.persistence.repository.PackageRepository;
 import at.fhtw.mtcgapp.service.command.CreateCardCommand;
 import at.fhtw.mtcgapp.service.dto.PackageDto;
+import at.fhtw.mtcgapp.service.exception.TransactionValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -22,7 +24,9 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class PackageService {
+    private final AuthenticationService authenticationService;
     private final PackageRepository packageRepository;
+    private final CardRepository cardRepository;
     private final Validator validator;
 
     public PackageDto createPackage(String authToken, List<CreateCardCommand> commands) {
@@ -81,6 +85,24 @@ public class PackageService {
     }
 
     public void acquirePackage(String authToken) {
+        log.debug("Trying to acquire package with auth token {}", authToken);
 
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        if (user.getCoins() < 5) {
+            log.warn("User {} has not enough coins to purchase a package!", user);
+            throw TransactionValidationException.notEnoughCoins(user.getUsername());
+        }
+
+        Package pkg = packageRepository.getPackage().orElseThrow(TransactionValidationException::noPackagesAvailable);
+
+        pkg.getCards().forEach(card -> card.setUser(user));
+        pkg.getCards().forEach(card -> card.setCardPackage(null));
+        user.getStack().addAll(pkg.getCards());
+
+        pkg.getCards().forEach(cardRepository::updateCard);
+        packageRepository.deletePackage(pkg.getId());
+
+        log.info("User {} acquired package {}", user, pkg);
     }
 }

@@ -42,10 +42,11 @@ public class Main {
         CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 
-        PackageService packageService = new PackageService(packageRepository, validator);
+        AuthenticationService authenticationService = new AuthenticationService(sessionRepository, userRepository, validator, encoder);
+        PackageService packageService = new PackageService(authenticationService, packageRepository, cardRepository, validator);
 
         router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
-        router.addService("/sessions", new AuthenticationController(new AuthenticationService(sessionRepository, userRepository, validator, encoder), objectMapper));
+        router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));
         router.addService("/packages", new PackageController(packageService, objectMapper));
         router.addService("/transactions", new TransactionsController(packageService));
 

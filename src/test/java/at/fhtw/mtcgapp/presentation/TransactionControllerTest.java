@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionControllerTest {
@@ -42,5 +44,6 @@ public class TransactionControllerTest {
         // Then
         assertThat(response.getStatus()).isEqualTo(201);
         assertThat(response.getMessage()).isEqualTo("CREATED");
+        verify(packageService).acquirePackage(eq("Thomas-mtgcToken"));
     }
 }
