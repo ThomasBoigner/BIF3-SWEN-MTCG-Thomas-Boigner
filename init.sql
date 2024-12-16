@@ -1,10 +1,22 @@
 CREATE SCHEMA IF NOT EXISTS mtcg;
 
-CREATE TYPE mtcg.card_type AS ENUM ('monster', 'spell');
-ALTER TYPE mtcg.card_type OWNER TO mtcgdb;
-
-CREATE TYPE mtcg.damage_type AS ENUM ('fire', 'water', 'normal');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'damage_type') THEN
+        CREATE TYPE mtcg.damage_type AS ENUM ('fire', 'water', 'normal');
+    END IF;
+END
+$$;
 ALTER TYPE mtcg.damage_type OWNER TO mtcgdb;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'card_type') THEN
+        CREATE TYPE mtcg.card_type AS ENUM ('monster', 'spell');
+    END IF;
+END
+$$;
+ALTER TYPE mtcg.card_type OWNER TO mtcgdb;
 
 CREATE TABLE IF NOT EXISTS mtcg."user"
 (

@@ -1,36 +1,30 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
+import at.fhtw.mtcgapp.model.Card;
 import at.fhtw.mtcgapp.model.DamageType;
 import at.fhtw.mtcgapp.model.MonsterCard;
+import at.fhtw.mtcgapp.model.SpellCard;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
-import at.fhtw.mtcgapp.model.Package;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @Testcontainers
-@ExtendWith(MockitoExtension.class)
-public class PackageRepositoryTest {
+public class CardRepositoryTest {
 
     Consumer<CreateContainerCmd> cmd = e -> e.withPortBindings(new PortBinding(Ports.Binding.bindPort(5432), new ExposedPort(5432)));
     @Container
@@ -43,18 +37,16 @@ public class PackageRepositoryTest {
                     entry("POSTGRES_PASSWORD", "mtcgdb")
             ));
 
-    private PackageRepository packageRepository;
-    @Mock
     private CardRepository cardRepository;
 
     @BeforeEach
     void setUp() {
         UnitOfWork unitOfWork = new UnitOfWork();
-        packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
+        cardRepository = new CardRepositoryImpl(unitOfWork);
     }
 
     @Test
-    void ensureSavePackageWorksProperly(){
+    void ensureSaveMonsterCardWorksProperly(){
         // Given
         MonsterCard monsterCard = MonsterCard.builder()
                 .token(UUID.randomUUID())
@@ -64,17 +56,30 @@ public class PackageRepositoryTest {
                 .defence(10)
                 .build();
 
-        Package pkg = Package.builder()
-                .token(UUID.randomUUID())
-                .price(5)
-                .cards(List.of(monsterCard))
-                .build();
-        when(cardRepository.save(eq(monsterCard))).thenReturn(monsterCard);
-
         // When
-        Package returned = packageRepository.save(pkg);
+        Card returned = cardRepository.save(monsterCard);
 
         // Then
-        assertThat(returned).isEqualTo(pkg);
+        assertThat(returned.getId()).isNotZero();
+        assertThat((MonsterCard)returned).isEqualTo(monsterCard);
+    }
+
+    @Test
+    void ensureSaveSpellCardWorksProperly(){
+        // Given
+        SpellCard spellCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(15)
+                .damageType(DamageType.FIRE)
+                .criticalHitChance(0.2)
+                .build();
+
+        // When
+        Card returned = cardRepository.save(spellCard);
+
+        // Then
+        assertThat(returned.getId()).isNotZero();
+        assertThat((SpellCard)returned).isEqualTo(spellCard);
     }
 }

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @RequiredArgsConstructor
@@ -20,15 +21,25 @@ public class PackageRepositoryImpl implements PackageRepository {
     public Package save(Package pkg) {
         log.debug("Trying to save package {}", pkg);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, battles_fought)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO mtcg.package (token, price)
+                VALUES (?, ?)
+                RETURNING id;
                 """)) {
+            preparedStatement.setObject(1, pkg.getToken());
+            preparedStatement.setInt(2, pkg.getPrice());
 
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            pkg.setId(resultSet.getLong("id"));
+
+            unitOfWork.commitTransaction();
         } catch (SQLException e) {
             unitOfWork.rollbackTransaction();
             log.error("Could not create package due to a sql exception");
             throw new DataAccessException("Insert into failed!", e);
         }
-        return null;
+
+        pkg.getCards().forEach(cardRepository::save);
+        return pkg;
     }
 }
