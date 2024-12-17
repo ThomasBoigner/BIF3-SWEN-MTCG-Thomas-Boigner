@@ -167,4 +167,30 @@ public class UserRepositoryTest {
         // Then
         assertThat(exists).isFalse();
     }
+
+    @Test
+    void ensureUpdateUserWorksProperly() {
+        // Given
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        userRepository.save(user);
+
+        // When
+        User returned = userRepository.updateUser(user);
+
+        // Then
+        assertThat(returned).isEqualTo(user);
+    }
 }

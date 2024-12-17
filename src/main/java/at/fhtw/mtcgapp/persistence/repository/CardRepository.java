@@ -4,4 +4,5 @@ import at.fhtw.mtcgapp.model.Card;
 
 public interface CardRepository {
     Card save(Card card);
+    Card updateCard(Card card);
 }

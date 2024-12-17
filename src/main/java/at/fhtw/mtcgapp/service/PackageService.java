@@ -2,9 +2,12 @@ package at.fhtw.mtcgapp.service;
 
 import at.fhtw.mtcgapp.model.*;
 import at.fhtw.mtcgapp.model.Package;
+import at.fhtw.mtcgapp.persistence.repository.CardRepository;
 import at.fhtw.mtcgapp.persistence.repository.PackageRepository;
+import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateCardCommand;
 import at.fhtw.mtcgapp.service.dto.PackageDto;
+import at.fhtw.mtcgapp.service.exception.TransactionValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -22,7 +25,10 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class PackageService {
+    private final AuthenticationService authenticationService;
     private final PackageRepository packageRepository;
+    private final CardRepository cardRepository;
+    private final UserRepository userRepository;
     private final Validator validator;
 
     public PackageDto createPackage(String authToken, List<CreateCardCommand> commands) {
@@ -55,7 +61,7 @@ public class PackageService {
 
             if (command.name().contains("Spell")) {
                 return SpellCard.builder()
-                        .token(command.id())
+                        .token((command.id() != null) ? command.id() : UUID.randomUUID())
                         .name(command.name())
                         .damage(command.damage())
                         .cardPackage(pkg)
@@ -64,7 +70,7 @@ public class PackageService {
                         .build();
             } else {
                 return MonsterCard.builder()
-                        .token(command.id())
+                        .token((command.id() != null) ? command.id() : UUID.randomUUID())
                         .name(command.name())
                         .damage(command.damage())
                         .cardPackage(pkg)
@@ -78,5 +84,29 @@ public class PackageService {
 
         log.info("Created package {}", pkg);
         return new PackageDto(packageRepository.save(pkg));
+    }
+
+    public void acquirePackage(String authToken) {
+        log.debug("Trying to acquire package with auth token {}", authToken);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        if (user.getCoins() < 5) {
+            log.warn("User {} has not enough coins to purchase a package!", user);
+            throw TransactionValidationException.notEnoughCoins(user.getUsername());
+        }
+
+        Package pkg = packageRepository.getPackage().orElseThrow(TransactionValidationException::noPackagesAvailable);
+
+        pkg.getCards().forEach(card -> card.setUser(user));
+        pkg.getCards().forEach(card -> card.setCardPackage(null));
+        user.getStack().addAll(pkg.getCards());
+        user.setCoins(user.getCoins() - 5);
+
+        pkg.getCards().forEach(cardRepository::updateCard);
+        userRepository.updateUser(user);
+        packageRepository.deletePackage(pkg.getId());
+
+        log.info("User {} acquired package {}", user, pkg);
     }
 }

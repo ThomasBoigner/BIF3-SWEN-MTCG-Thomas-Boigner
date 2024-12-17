@@ -82,4 +82,42 @@ public class CardRepositoryTest {
         assertThat(returned.getId()).isNotZero();
         assertThat((SpellCard)returned).isEqualTo(spellCard);
     }
+
+    @Test
+    void ensureUpdateCardWorksWithMonsterCard(){
+        // Given
+        MonsterCard monsterCard = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+        cardRepository.save(monsterCard);
+
+        // When
+        Card returned = cardRepository.updateCard(monsterCard);
+
+        // Then
+        assertThat(returned).isEqualTo(monsterCard);
+    }
+
+    @Test
+    void ensureUpdateCardWorksWithSpellCard(){
+        // Given
+        SpellCard spellCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(15)
+                .damageType(DamageType.FIRE)
+                .criticalHitChance(0.2)
+                .build();
+        cardRepository.save(spellCard);
+
+        // When
+        Card returned = cardRepository.updateCard(spellCard);
+
+        // Then
+        assertThat(returned).isEqualTo(spellCard);
+    }
 }

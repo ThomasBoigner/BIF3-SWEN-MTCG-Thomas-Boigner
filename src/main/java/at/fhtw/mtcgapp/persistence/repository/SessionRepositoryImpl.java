@@ -112,7 +112,7 @@ public class SessionRepositoryImpl implements SessionRepository {
                 """)) {
             preparedStatement.setString(1, token);
 
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
             unitOfWork.commitTransaction();
         } catch (SQLException e) {
             log.error("Could not delete session due to a sql exception");
