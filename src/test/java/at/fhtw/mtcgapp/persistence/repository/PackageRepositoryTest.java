@@ -81,28 +81,31 @@ public class PackageRepositoryTest {
     @Test
     void ensureGetPackageWorksProperly() {
         // Given
+        Package pkg = Package.builder()
+                .token(UUID.randomUUID())
+                .price(5)
+                .build();
+
         MonsterCard monsterCard = MonsterCard.builder()
                 .token(UUID.randomUUID())
                 .name("Dragon")
                 .damage(50)
                 .damageType(DamageType.NORMAL)
+                .cardPackage(pkg)
                 .defence(10)
                 .build();
-
 
         SpellCard spellCard = SpellCard.builder()
                 .token(UUID.randomUUID())
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
+                .cardPackage(pkg)
                 .criticalHitChance(0.2)
                 .build();
 
-        Package pkg = Package.builder()
-                .token(UUID.randomUUID())
-                .price(5)
-                .cards(List.of(monsterCard, spellCard))
-                .build();
+        pkg.setCards(List.of(spellCard, monsterCard));
+
         packageRepository.save(pkg);
 
         // When
@@ -112,5 +115,16 @@ public class PackageRepositoryTest {
         assertThat(returned.isPresent()).isTrue();
         assertThat(returned.get()).isEqualTo(pkg);
         assertThat(returned.get().getCards()).hasSize(2);
+        assertThat(returned.get().getCards()).contains(spellCard);
+        assertThat(returned.get().getCards()).contains(monsterCard);
+    }
+
+    @Test
+    void ensureGetPackageReturnsOptionalEmpty() {
+        // When
+        Optional<Package> returned = packageRepository.getPackage();
+
+        // Then
+        assertThat(returned.isPresent()).isFalse();
     }
 }

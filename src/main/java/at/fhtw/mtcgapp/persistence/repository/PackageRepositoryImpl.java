@@ -125,7 +125,7 @@ public class PackageRepositoryImpl implements PackageRepository {
                         .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
                         .user(null)
                         .cardPackage(pkg)
-                        .criticalHitChance(resultSet.getDouble("criticalHitChance"))
+                        .criticalHitChance(resultSet.getDouble("critical_hit_chance"))
                         .build());
             }
         } catch (SQLException e) {
