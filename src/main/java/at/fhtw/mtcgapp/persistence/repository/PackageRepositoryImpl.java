@@ -134,7 +134,6 @@ public class PackageRepositoryImpl implements PackageRepository {
             throw new DataAccessException("Select failed!", e);
         }
 
-
         log.debug("Spellcards: {}", spellCards);
         log.debug("MonsterCards: {}", monsterCards);
         pkg.getCards().addAll(monsterCards);
@@ -145,6 +144,20 @@ public class PackageRepositoryImpl implements PackageRepository {
 
     @Override
     public void deletePackage(long id) {
-        throw new UnsupportedOperationException("Not yet implemented!");
+        log.debug("Trying to delete package with id {}", id);
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                DELETE
+                FROM mtcg.package
+                WHERE id = ?
+                """)) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+
+            unitOfWork.commitTransaction();
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            log.error("Could not delete package due to a sql exception");
+            throw new DataAccessException("Delete failed!", e);
+        }
     }
 }

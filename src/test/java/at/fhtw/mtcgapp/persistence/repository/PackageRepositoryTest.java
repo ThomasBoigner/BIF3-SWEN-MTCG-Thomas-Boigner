@@ -127,4 +127,38 @@ public class PackageRepositoryTest {
         // Then
         assertThat(returned.isPresent()).isFalse();
     }
+
+    @Test
+    void ensureDeletePackageWorksProperly() {
+        // Given
+        Package pkg = Package.builder()
+                .token(UUID.randomUUID())
+                .price(5)
+                .build();
+
+        MonsterCard monsterCard = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .cardPackage(pkg)
+                .defence(10)
+                .build();
+
+        SpellCard spellCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(15)
+                .damageType(DamageType.FIRE)
+                .cardPackage(pkg)
+                .criticalHitChance(0.2)
+                .build();
+
+        pkg.setCards(List.of(spellCard, monsterCard));
+
+        packageRepository.save(pkg);
+
+        // When
+        packageRepository.deletePackage(pkg.getId());
+    }
 }
