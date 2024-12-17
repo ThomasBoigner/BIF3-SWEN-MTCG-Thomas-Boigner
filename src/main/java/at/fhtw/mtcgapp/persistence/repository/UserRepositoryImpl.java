@@ -109,4 +109,31 @@ public class UserRepositoryImpl implements UserRepository {
             throw new DataAccessException("Exists failed!", e);
         }
     }
+
+    @Override
+    public User updateUser(User user) {
+        log.debug("Trying to update user {}", user);
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                UPDATE mtcg.user
+                SET token = ?, username = ?, password = ?, bio = ?, image = ?, coins = ?, elo = ?, battles_fought = ?
+                WHERE id = ?
+                """)) {
+            preparedStatement.setObject(1, user.getToken());
+            preparedStatement.setString(2, user.getUsername());
+            preparedStatement.setString(3, user.getPassword());
+            preparedStatement.setString(4, user.getBio());
+            preparedStatement.setString(5, user.getImage());
+            preparedStatement.setInt(6, user.getCoins());
+            preparedStatement.setInt(7, user.getElo());
+            preparedStatement.setInt(8, user.getBattlesFought());
+            preparedStatement.setLong(9, user.getId());
+
+            preparedStatement.executeUpdate();
+            return user;
+        } catch (SQLException e) {
+            unitOfWork.rollbackTransaction();
+            log.error("Could not update user due to a sql exception");
+            throw new DataAccessException("Update failed!", e);
+        }
+    }
 }

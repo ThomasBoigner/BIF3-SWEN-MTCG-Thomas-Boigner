@@ -4,6 +4,7 @@ import at.fhtw.mtcgapp.model.*;
 import at.fhtw.mtcgapp.model.Package;
 import at.fhtw.mtcgapp.persistence.repository.CardRepository;
 import at.fhtw.mtcgapp.persistence.repository.PackageRepository;
+import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateCardCommand;
 import at.fhtw.mtcgapp.service.dto.PackageDto;
 import at.fhtw.mtcgapp.service.exception.TransactionValidationException;
@@ -27,6 +28,7 @@ public class PackageService {
     private final AuthenticationService authenticationService;
     private final PackageRepository packageRepository;
     private final CardRepository cardRepository;
+    private final UserRepository userRepository;
     private final Validator validator;
 
     public PackageDto createPackage(String authToken, List<CreateCardCommand> commands) {
@@ -99,8 +101,10 @@ public class PackageService {
         pkg.getCards().forEach(card -> card.setUser(user));
         pkg.getCards().forEach(card -> card.setCardPackage(null));
         user.getStack().addAll(pkg.getCards());
+        user.setCoins(user.getCoins() - 5);
 
         pkg.getCards().forEach(cardRepository::updateCard);
+        userRepository.updateUser(user);
         packageRepository.deletePackage(pkg.getId());
 
         log.info("User {} acquired package {}", user, pkg);

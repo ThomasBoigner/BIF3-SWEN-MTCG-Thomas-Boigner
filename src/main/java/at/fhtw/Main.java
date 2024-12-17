@@ -43,7 +43,7 @@ public class Main {
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 
         AuthenticationService authenticationService = new AuthenticationService(sessionRepository, userRepository, validator, encoder);
-        PackageService packageService = new PackageService(authenticationService, packageRepository, cardRepository, validator);
+        PackageService packageService = new PackageService(authenticationService, packageRepository, cardRepository, userRepository, validator);
 
         router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));

@@ -4,6 +4,7 @@ import at.fhtw.mtcgapp.model.*;
 import at.fhtw.mtcgapp.model.Package;
 import at.fhtw.mtcgapp.persistence.repository.CardRepository;
 import at.fhtw.mtcgapp.persistence.repository.PackageRepository;
+import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateCardCommand;
 import at.fhtw.mtcgapp.service.dto.CardDto;
 import at.fhtw.mtcgapp.service.dto.PackageDto;
@@ -36,10 +37,12 @@ public class PackageServiceTest {
     private PackageRepository packageRepository;
     @Mock
     private CardRepository cardRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        packageService = new PackageService(authenticationService, packageRepository, cardRepository, Validation.buildDefaultValidatorFactory().getValidator());
+        packageService = new PackageService(authenticationService, packageRepository, cardRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator());
     }
 
     @Test
@@ -181,6 +184,7 @@ public class PackageServiceTest {
         when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
         when(packageRepository.getPackage()).thenReturn(Optional.of(pkg));
         when(cardRepository.updateCard(eq(monsterCard))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        when(userRepository.updateUser(eq(user))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
 
         // When
         packageService.acquirePackage(authToken);
