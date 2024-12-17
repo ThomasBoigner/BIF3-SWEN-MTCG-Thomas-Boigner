@@ -2,6 +2,7 @@ package at.fhtw.mtcgapp.persistence.repository;
 
 import at.fhtw.mtcgapp.model.DamageType;
 import at.fhtw.mtcgapp.model.MonsterCard;
+import at.fhtw.mtcgapp.model.SpellCard;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import at.fhtw.mtcgapp.model.Package;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -20,6 +21,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -29,7 +31,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @Testcontainers
-@ExtendWith(MockitoExtension.class)
 public class PackageRepositoryTest {
 
     Consumer<CreateContainerCmd> cmd = e -> e.withPortBindings(new PortBinding(Ports.Binding.bindPort(5432), new ExposedPort(5432)));
@@ -44,12 +45,12 @@ public class PackageRepositoryTest {
             ));
 
     private PackageRepository packageRepository;
-    @Mock
     private CardRepository cardRepository;
 
     @BeforeEach
     void setUp() {
         UnitOfWork unitOfWork = new UnitOfWork();
+        cardRepository = new CardRepositoryImpl(unitOfWork);
         packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
     }
 
@@ -69,12 +70,47 @@ public class PackageRepositoryTest {
                 .price(5)
                 .cards(List.of(monsterCard))
                 .build();
-        when(cardRepository.save(eq(monsterCard))).thenReturn(monsterCard);
 
         // When
         Package returned = packageRepository.save(pkg);
 
         // Then
         assertThat(returned).isEqualTo(pkg);
+    }
+
+    @Test
+    void ensureGetPackageWorksProperly() {
+        // Given
+        MonsterCard monsterCard = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+
+
+        SpellCard spellCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(15)
+                .damageType(DamageType.FIRE)
+                .criticalHitChance(0.2)
+                .build();
+
+        Package pkg = Package.builder()
+                .token(UUID.randomUUID())
+                .price(5)
+                .cards(List.of(monsterCard, spellCard))
+                .build();
+        packageRepository.save(pkg);
+
+        // When
+        Optional<Package> returned = packageRepository.getPackage();
+
+        // Then
+        assertThat(returned.isPresent()).isTrue();
+        assertThat(returned.get()).isEqualTo(pkg);
+        assertThat(returned.get().getCards()).hasSize(2);
     }
 }
