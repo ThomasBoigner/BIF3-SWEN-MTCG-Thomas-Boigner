@@ -59,7 +59,7 @@ public class PackageService {
 
             if (command.name().contains("Spell")) {
                 return SpellCard.builder()
-                        .token(command.id())
+                        .token((command.id() != null) ? command.id() : UUID.randomUUID())
                         .name(command.name())
                         .damage(command.damage())
                         .cardPackage(pkg)
@@ -68,7 +68,7 @@ public class PackageService {
                         .build();
             } else {
                 return MonsterCard.builder()
-                        .token(command.id())
+                        .token((command.id() != null) ? command.id() : UUID.randomUUID())
                         .name(command.name())
                         .damage(command.damage())
                         .cardPackage(pkg)

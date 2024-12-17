@@ -31,6 +31,6 @@ public class TransactionsController extends AbstractController {
     private Response acquirePackage(Request request) {
         log.debug("Incoming http POST request {}", request);
         packageService.acquirePackage(extractAuthToken(request.getHeaderMap()));
-        return new Response(HttpStatus.CREATED, ContentType.JSON, "[]");
+        return new Response(HttpStatus.CREATED);
     }
 }

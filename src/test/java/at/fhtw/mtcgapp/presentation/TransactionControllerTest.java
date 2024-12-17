@@ -43,7 +43,6 @@ public class TransactionControllerTest {
 
         // Then
         assertThat(response.getStatus()).isEqualTo(201);
-        assertThat(response.getMessage()).isEqualTo("CREATED");
         verify(packageService).acquirePackage(eq("Thomas-mtgcToken"));
     }
 }
