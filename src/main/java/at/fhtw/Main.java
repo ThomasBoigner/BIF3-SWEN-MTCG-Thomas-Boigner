@@ -4,11 +4,9 @@ import at.fhtw.httpserver.server.Server;
 import at.fhtw.httpserver.utils.Router;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import at.fhtw.mtcgapp.persistence.repository.*;
-import at.fhtw.mtcgapp.presentation.AuthenticationController;
-import at.fhtw.mtcgapp.presentation.PackageController;
-import at.fhtw.mtcgapp.presentation.TransactionsController;
-import at.fhtw.mtcgapp.presentation.UserController;
+import at.fhtw.mtcgapp.presentation.*;
 import at.fhtw.mtcgapp.service.AuthenticationService;
+import at.fhtw.mtcgapp.service.CardService;
 import at.fhtw.mtcgapp.service.PackageService;
 import at.fhtw.mtcgapp.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +47,7 @@ public class Main {
         router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));
         router.addService("/packages", new PackageController(packageService, objectMapper));
         router.addService("/transactions", new TransactionsController(packageService));
+        router.addService("/cards", new CardController(new CardService(cardRepository), objectMapper));
 
         return router;
     }
