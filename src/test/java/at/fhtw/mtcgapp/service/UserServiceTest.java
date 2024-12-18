@@ -29,7 +29,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp(){
-        userService = new UserService(userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
+        userService = new UserServiceImpl(userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
     }
 
     @Test

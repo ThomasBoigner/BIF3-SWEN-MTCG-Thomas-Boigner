@@ -30,7 +30,7 @@ public class CardServiceTest {
 
     @BeforeEach
     void setUp(){
-        cardService = new CardService(cardRepository, authenticationService);
+        cardService = new CardServiceImpl(cardRepository, authenticationService);
     }
 
     @Test

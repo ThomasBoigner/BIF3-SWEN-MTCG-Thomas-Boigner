@@ -5,10 +5,7 @@ import at.fhtw.httpserver.utils.Router;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import at.fhtw.mtcgapp.persistence.repository.*;
 import at.fhtw.mtcgapp.presentation.*;
-import at.fhtw.mtcgapp.service.AuthenticationService;
-import at.fhtw.mtcgapp.service.CardService;
-import at.fhtw.mtcgapp.service.PackageService;
-import at.fhtw.mtcgapp.service.UserService;
+import at.fhtw.mtcgapp.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -40,14 +37,14 @@ public class Main {
         CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 
-        AuthenticationService authenticationService = new AuthenticationService(sessionRepository, userRepository, validator, encoder);
-        PackageService packageService = new PackageService(authenticationService, packageRepository, cardRepository, userRepository, validator);
+        AuthenticationService authenticationService = new AuthenticationServiceImpl(sessionRepository, userRepository, validator, encoder);
+        PackageService packageService = new PackageServiceImpl(authenticationService, packageRepository, cardRepository, userRepository, validator);
 
-        router.addService("/users", new UserController(new UserService(userRepository, validator, encoder), objectMapper));
+        router.addService("/users", new UserController(new UserServiceImpl(userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));
         router.addService("/packages", new PackageController(packageService, objectMapper));
         router.addService("/transactions", new TransactionsController(packageService));
-        router.addService("/cards", new CardController(new CardService(cardRepository, authenticationService), objectMapper));
+        router.addService("/cards", new CardController(new CardServiceImpl(cardRepository, authenticationService), objectMapper));
 
         return router;
     }
