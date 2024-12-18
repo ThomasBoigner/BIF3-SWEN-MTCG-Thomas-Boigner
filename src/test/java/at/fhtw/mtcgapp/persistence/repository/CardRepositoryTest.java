@@ -1,9 +1,6 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
-import at.fhtw.mtcgapp.model.Card;
-import at.fhtw.mtcgapp.model.DamageType;
-import at.fhtw.mtcgapp.model.MonsterCard;
-import at.fhtw.mtcgapp.model.SpellCard;
+import at.fhtw.mtcgapp.model.*;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.ExposedPort;
@@ -16,6 +13,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -119,5 +118,52 @@ public class CardRepositoryTest {
 
         // Then
         assertThat(returned).isEqualTo(spellCard);
+    }
+
+    @Test
+    void ensureGetCardsOfUserWorksProperly(){
+        // Given
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        MonsterCard monsterCard = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .user(user)
+                .build();
+        cardRepository.save(monsterCard);
+
+        SpellCard spellCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(15)
+                .damageType(DamageType.FIRE)
+                .criticalHitChance(0.2)
+                .user(user)
+                .build();
+        cardRepository.save(spellCard);
+
+        // When
+        List<Card> cards = cardRepository.getCardsOfUser(user.getId());
+
+        // Then
+        assertThat(cards).hasSize(2);
+        assertThat(cards).contains(monsterCard);
+        assertThat(cards).contains(spellCard);
     }
 }
