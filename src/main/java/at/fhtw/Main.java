@@ -47,7 +47,7 @@ public class Main {
         router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));
         router.addService("/packages", new PackageController(packageService, objectMapper));
         router.addService("/transactions", new TransactionsController(packageService));
-        router.addService("/cards", new CardController(new CardService(cardRepository), objectMapper));
+        router.addService("/cards", new CardController(new CardService(cardRepository, authenticationService), objectMapper));
 
         return router;
     }

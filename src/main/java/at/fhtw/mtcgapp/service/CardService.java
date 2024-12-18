@@ -1,5 +1,7 @@
 package at.fhtw.mtcgapp.service;
 
+import at.fhtw.mtcgapp.model.Card;
+import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.CardRepository;
 import at.fhtw.mtcgapp.service.dto.CardDto;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +14,15 @@ import java.util.List;
 @Slf4j
 public class CardService {
     private final CardRepository cardRepository;
+    private final AuthenticationService authenticationService;
 
     public List<CardDto> getCardsOfUser(String authToken) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        log.debug("Trying to get all cards of user with authToken {}", authToken);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+        List<Card> cards = cardRepository.getCardsOfUser(user.getId());
+
+        log.info("Found {} cards for user {}", cards.size(), user.getUsername());
+        return cards.stream().map(CardDto::new).toList();
     }
 }

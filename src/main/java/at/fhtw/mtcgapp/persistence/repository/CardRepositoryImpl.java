@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 @RequiredArgsConstructor
 
@@ -128,5 +129,10 @@ public class CardRepositoryImpl implements CardRepository {
             }
         }
         throw new IllegalArgumentException("Card type not supported!");
+    }
+
+    @Override
+    public List<Card> getCardsOfUser(long userId) {
+        throw new UnsupportedOperationException("Not yet implemented!");
     }
 }
