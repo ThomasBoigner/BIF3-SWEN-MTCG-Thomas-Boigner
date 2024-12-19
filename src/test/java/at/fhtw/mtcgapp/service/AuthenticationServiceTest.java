@@ -35,7 +35,7 @@ public class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
-        authenticationService = new AuthenticationService(sessionRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
+        authenticationService = new AuthenticationServiceImpl(sessionRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
     }
 
     @Test

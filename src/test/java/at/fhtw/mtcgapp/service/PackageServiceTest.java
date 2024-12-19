@@ -42,7 +42,7 @@ public class PackageServiceTest {
 
     @BeforeEach
     void setUp() {
-        packageService = new PackageService(authenticationService, packageRepository, cardRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator());
+        packageService = new PackageServiceImpl(authenticationService, packageRepository, cardRepository, userRepository, Validation.buildDefaultValidatorFactory().getValidator());
     }
 
     @Test
