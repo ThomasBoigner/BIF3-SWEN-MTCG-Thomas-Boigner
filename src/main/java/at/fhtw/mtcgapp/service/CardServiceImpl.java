@@ -25,4 +25,9 @@ public class CardServiceImpl implements CardService{
         log.info("Found {} cards for user {}", cards.size(), user.getUsername());
         return cards.stream().map(CardDto::new).toList();
     }
+
+    @Override
+    public List<CardDto> getDeckOfUser(String authToken) {
+        throw new UnsupportedOperationException("Not Implemented!");
+    }
 }
