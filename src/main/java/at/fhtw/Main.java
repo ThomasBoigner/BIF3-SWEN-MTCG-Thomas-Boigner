@@ -39,12 +39,14 @@ public class Main {
 
         AuthenticationService authenticationService = new AuthenticationServiceImpl(sessionRepository, userRepository, validator, encoder);
         PackageService packageService = new PackageServiceImpl(authenticationService, packageRepository, cardRepository, userRepository, validator);
+        CardService cardService = new CardServiceImpl(cardRepository, authenticationService);
 
         router.addService("/users", new UserController(new UserServiceImpl(userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));
         router.addService("/packages", new PackageController(packageService, objectMapper));
         router.addService("/transactions", new TransactionsController(packageService));
-        router.addService("/cards", new CardController(new CardServiceImpl(cardRepository, authenticationService), objectMapper));
+        router.addService("/cards", new CardController(cardService, objectMapper));
+        router.addService("/deck", new DeckController(cardService, objectMapper));
 
         return router;
     }

@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -195,5 +194,10 @@ public class CardRepositoryImpl implements CardRepository {
         }
 
         return Stream.concat(monsterCards.stream(), spellCards.stream()).toList();
+    }
+
+    @Override
+    public List<Card> getCardsInDeckOfUser(long userId) {
+        throw new UnsupportedOperationException("Not yet implemented!");
     }
 }
