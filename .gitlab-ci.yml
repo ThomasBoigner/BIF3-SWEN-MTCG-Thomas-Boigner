@@ -1,0 +1,30 @@
+default:
+  image: maven:3.9.9-amazoncorretto-8-debian
+
+stages:
+  - lint
+  - test
+  - build
+#  - deploy
+
+lint:
+  stage: lint
+  script:
+    - echo "Lint App"
+    - mvn pmd:check
+
+test:
+  stage: test
+  script:
+    - echo "Test App"
+    - mvn surefire:test
+
+build:
+  stage: build
+  script:
+    - echo "Build App"
+    - mvn clean install -Dmaven.test.skip=true
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 day

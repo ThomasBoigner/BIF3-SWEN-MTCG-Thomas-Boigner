@@ -31,7 +31,7 @@ public class UserRepositoryImpl implements UserRepository {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             User user = null;
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 user = User.builder()
                         .id(resultSet.getLong("id"))
                         .token(UUID.fromString(resultSet.getString("token")))
@@ -73,8 +73,9 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setInt(8, user.getBattlesFought());
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            user.setId(resultSet.getLong("id"));
+            if(resultSet.next()) {
+                user.setId(resultSet.getLong("id"));
+            }
 
             unitOfWork.commitTransaction();
 
@@ -99,8 +100,10 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setString(1, username);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            resultSet.next();
-            boolean exists = resultSet.getBoolean(1);
+            boolean exists = false;
+            if(resultSet.next()) {
+                exists = resultSet.getBoolean(1);
+            }
             log.debug(exists ? "User with username {} does exist" : " User with username {} does not exist", username);
             return exists;
 
@@ -129,6 +132,7 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setLong(9, user.getId());
 
             preparedStatement.executeUpdate();
+            unitOfWork.commitTransaction();
             return user;
         } catch (SQLException e) {
             unitOfWork.rollbackTransaction();

@@ -32,7 +32,7 @@ public class SessionRepositoryImpl implements SessionRepository {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             User user = null;
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 user = User.builder()
                         .id(resultSet.getLong("id"))
                         .token(UUID.fromString(resultSet.getString("token")))
@@ -68,8 +68,9 @@ public class SessionRepositoryImpl implements SessionRepository {
             preparedStatement.setLong(2, session.getUser().getId());
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            session.setId(resultSet.getLong("id"));
+            if(resultSet.next()) {
+                session.setId(resultSet.getLong("id"));
+            }
 
             unitOfWork.commitTransaction();
             return session;
@@ -93,8 +94,10 @@ public class SessionRepositoryImpl implements SessionRepository {
             preparedStatement.setString(1, token);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            resultSet.next();
-            boolean exists = resultSet.getBoolean(1);
+            boolean exists = false;
+            if(resultSet.next()) {
+                exists = resultSet.getBoolean(1);
+            }
             log.debug(exists ? "Session with token {} does exist" : " Session with token {} does not exist", token);
             return exists;
         } catch (SQLException e) {

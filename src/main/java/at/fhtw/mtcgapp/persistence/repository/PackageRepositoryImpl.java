@@ -34,8 +34,9 @@ public class PackageRepositoryImpl implements PackageRepository {
             preparedStatement.setInt(2, pkg.getPrice());
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            pkg.setId(resultSet.getLong("id"));
+            if(resultSet.next()) {
+                pkg.setId(resultSet.getLong("id"));
+            }
 
             unitOfWork.commitTransaction();
         } catch (SQLException e) {

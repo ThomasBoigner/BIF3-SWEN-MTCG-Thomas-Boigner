@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -42,8 +41,9 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setDouble(7, ((MonsterCard) card).getDefence());
 
                 ResultSet resultSet = preparedStatement.executeQuery();
-                resultSet.next();
-                card.setId(resultSet.getLong("id"));
+                if(resultSet.next()) {
+                    card.setId(resultSet.getLong("id"));
+                }
 
                 unitOfWork.commitTransaction();
 
@@ -68,8 +68,9 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitChance());
 
                 ResultSet resultSet = preparedStatement.executeQuery();
-                resultSet.next();
-                card.setId(resultSet.getLong("id"));
+                if(resultSet.next()) {
+                    card.setId(resultSet.getLong("id"));
+                }
 
                 unitOfWork.commitTransaction();
 
