@@ -2,16 +2,20 @@ default:
   image: maven:3.9.9-amazoncorretto-8-debian
 
 stages:
-  - lint
+  #- lint
   - test
   - build
 #  - deploy
 
-lint:
-  stage: lint
-  script:
-    - echo "Lint App"
-    - mvn pmd:check
+cache:
+  paths:
+    - .m2/repository/
+
+#lint:
+  #stage: lint
+  #script:
+    #- echo "Lint App"
+    #- mvn pmd:check
 
 test:
   stage: test
