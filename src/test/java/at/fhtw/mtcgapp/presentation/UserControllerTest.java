@@ -96,7 +96,7 @@ public class UserControllerTest {
 
         // Then
         assertThat(response.getStatus()).isEqualTo(400);
-        assertThat(response.getContentType()).isEqualTo("application/json");
+        assertThat(response.getContentType()).isEqualTo("text/plain");
         assertThat(response.getContent()).isEqualTo("Body must not be null!");
     }
 }

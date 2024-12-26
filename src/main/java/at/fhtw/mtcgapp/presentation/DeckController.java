@@ -17,15 +17,14 @@ import java.util.List;
 @RequiredArgsConstructor
 
 @Slf4j
-public class CardController extends AbstractController{
-
+public class DeckController extends AbstractController {
     private final CardService cardService;
     private final ObjectMapper objectMapper;
 
     @Override
     public Response handleRequest(Request request) {
-        if (request.getMethod() == Method.GET && request.getPathname().equals("/cards")) {
-            return handleServiceErrors(request, this::getCards);
+        if (request.getMethod() == Method.GET && request.getPathname().equals("/deck")) {
+            return handleServiceErrors(request, this::getDeck);
         }
 
         return new Response(
@@ -35,10 +34,10 @@ public class CardController extends AbstractController{
         );
     }
 
-    private Response getCards(Request request) {
+    private Response getDeck(Request request) {
         log.debug("Incoming http GET request {}", request);
 
-        List<CardDto> cardDtos = cardService.getCardsOfUser(extractAuthToken(request.getHeaderMap()));
+        List<CardDto> cardDtos = cardService.getDeckOfUser(extractAuthToken(request.getHeaderMap()));
 
         String json;
         try {

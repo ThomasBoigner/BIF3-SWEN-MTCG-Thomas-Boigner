@@ -8,4 +8,5 @@ public interface CardRepository {
     Card save(Card card);
     Card updateCard(Card card);
     List<Card> getCardsOfUser(long userId);
+    List<Card> getCardsInDeckOfUser(long userId);
 }

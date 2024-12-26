@@ -25,4 +25,15 @@ public class CardServiceImpl implements CardService{
         log.info("Found {} cards for user {}", cards.size(), user.getUsername());
         return cards.stream().map(CardDto::new).toList();
     }
+
+    @Override
+    public List<CardDto> getDeckOfUser(String authToken) {
+        log.debug("Trying to get cards in deck of user with authToken {}", authToken);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+        List<Card> cards = cardRepository.getCardsInDeckOfUser(user.getId());
+
+        log.info("Found {} cards in deck of user {}", cards.size(), user.getUsername());
+        return cards.stream().map(CardDto::new).toList();
+    }
 }

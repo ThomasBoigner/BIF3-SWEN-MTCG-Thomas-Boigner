@@ -80,4 +80,52 @@ public class CardServiceTest {
         assertThat(cards).contains(new CardDto(monsterCard));
         assertThat(cards).contains(new CardDto(spellCard));
     }
+
+    @Test
+    void ensureGetDeckOfUserWorksProperly() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        MonsterCard monsterCard = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+
+
+        SpellCard spellCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(15)
+                .damageType(DamageType.FIRE)
+                .criticalHitChance(0.2)
+                .build();
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(cardRepository.getCardsInDeckOfUser(eq(user.getId()))).thenReturn(List.of(monsterCard, spellCard));
+
+        // When
+        List<CardDto> cards = cardService.getDeckOfUser(authToken);
+
+        // Then
+        assertThat(cards).hasSize(2);
+        assertThat(cards).contains(new CardDto(monsterCard));
+        assertThat(cards).contains(new CardDto(spellCard));
+    }
 }

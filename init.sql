@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS mtcg.card
     name character varying(32) COLLATE pg_catalog."default" NOT NULL,
     damage double precision NOT NULL,
     damage_type mtcg.damage_type NOT NULL,
+    in_deck boolean NOT NULL DEFAULT false,
     fk_user_id bigint,
     fk_package_id bigint,
     UNIQUE (token),
