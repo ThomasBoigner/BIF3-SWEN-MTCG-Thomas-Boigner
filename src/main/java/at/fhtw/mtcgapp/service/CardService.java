@@ -7,4 +7,5 @@ import java.util.List;
 public interface CardService {
     List<CardDto> getCardsOfUser(String authToken);
     List<CardDto> getDeckOfUser(String authToken);
+    void configureDeck(String authToken, List<String> cardIds);
 }

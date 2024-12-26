@@ -36,4 +36,9 @@ public class CardServiceImpl implements CardService{
         log.info("Found {} cards in deck of user {}", cards.size(), user.getUsername());
         return cards.stream().map(CardDto::new).toList();
     }
+
+    @Override
+    public void configureDeck(String authToken, List<String> cardIds) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }
