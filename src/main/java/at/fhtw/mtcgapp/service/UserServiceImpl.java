@@ -24,6 +24,10 @@ public class UserServiceImpl implements UserService {
     private final Validator validator;
     private final Base64.Encoder encoder;
 
+    public UserDto getUser(String authToken, String username) {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+
     public UserDto createUser(CreateUserCommand command) {
         log.debug("Trying to create user with command {}", command);
 

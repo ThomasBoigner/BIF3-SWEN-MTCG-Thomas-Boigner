@@ -25,6 +25,9 @@ public class UserController extends AbstractController {
 
     @Override
     public Response handleRequest(Request request) {
+        if (request.getMethod() == Method.GET && request.getPathname().contains("/users") && request.getPathParts().size() == 2) {
+            return handleServiceErrors(request, this::getUser);
+        }
         if (request.getMethod() == Method.POST && request.getPathname().equals("/users")) {
             return handleServiceErrors(request, this::createUser);
         }
@@ -34,6 +37,22 @@ public class UserController extends AbstractController {
                 ContentType.JSON,
                 "[]"
         );
+    }
+
+    private Response getUser(Request request) {
+        log.debug("Incoming http GET request {}", request);
+
+        UserDto userDto = userService.getUser(extractAuthToken(request.getHeaderMap()), request.getPathParts().get(1));
+
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(userDto);
+        } catch (JsonProcessingException e) {
+            log.error("Could not serialize the user dto!", e);
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new Response(HttpStatus.OK, ContentType.JSON, json);
     }
 
     private Response createUser(Request request) {
