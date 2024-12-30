@@ -33,8 +33,8 @@ public class Main {
         Base64.Encoder encoder = Base64.getEncoder();
 
         UserRepository userRepository = new UserRepositoryImpl(unitOfWork);
-        SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork);
         CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
+        SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork, cardRepository);
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 
         AuthenticationService authenticationService = new AuthenticationServiceImpl(sessionRepository, userRepository, validator, encoder);

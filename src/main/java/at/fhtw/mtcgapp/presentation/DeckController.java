@@ -8,11 +8,15 @@ import at.fhtw.httpserver.server.Response;
 import at.fhtw.mtcgapp.service.CardService;
 import at.fhtw.mtcgapp.service.dto.CardDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 
@@ -25,6 +29,9 @@ public class DeckController extends AbstractController {
     public Response handleRequest(Request request) {
         if (request.getMethod() == Method.GET && request.getPathname().equals("/deck")) {
             return handleServiceErrors(request, this::getDeck);
+        }
+        if (request.getMethod() == Method.PUT && request.getPathname().equals("/deck")) {
+            return handleServiceErrors(request, this::configureDeck);
         }
 
         return new Response(
@@ -39,14 +46,38 @@ public class DeckController extends AbstractController {
 
         List<CardDto> cardDtos = cardService.getDeckOfUser(extractAuthToken(request.getHeaderMap()));
 
-        String json;
+        String responseBody;
         try {
-            json = objectMapper.writeValueAsString(cardDtos);
+            if(request.getParams() != null && request.getParams().contains("format=plain")) {
+                responseBody = cardDtos.toString();
+            } else {
+                responseBody = objectMapper.writeValueAsString(cardDtos);
+            }
         } catch (JsonProcessingException e) {
             log.error("Could not serialize the card dtos!", e);
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new Response(HttpStatus.OK, ContentType.JSON, json);
+        return new Response(HttpStatus.OK, ContentType.JSON, responseBody);
+    }
+
+    private Response configureDeck(Request request) {
+        log.debug("Incoming http PUT request {}", request);
+        Objects.requireNonNull(request.getBody(), "Body must not be null!");
+
+        List<UUID> cardIds;
+        try {
+            cardIds = objectMapper.readValue(request.getBody(), objectMapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
+        } catch (JsonMappingException e) {
+            log.warn("Request body with wrong format was received {}!", request.getBody());
+            return new Response(HttpStatus.BAD_REQUEST);
+        } catch (JsonProcessingException e) {
+            log.warn("Could not deserialize the ids {}!", request.getBody());
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        cardService.configureDeck(extractAuthToken(request.getHeaderMap()), cardIds);
+
+        return new Response(HttpStatus.OK);
     }
 }

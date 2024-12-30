@@ -193,7 +193,7 @@ public class CardRepositoryImpl implements CardRepository {
             throw new DataAccessException("Select failed!", e);
         }
 
-        return Stream.concat(monsterCards.stream(), spellCards.stream()).toList();
+        return new ArrayList<>(Stream.concat(monsterCards.stream(), spellCards.stream()).toList());
     }
 
     @Override
@@ -204,7 +204,7 @@ public class CardRepositoryImpl implements CardRepository {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 SELECT monster_card.id, monster_card.token, monster_card.name, monster_card.damage, monster_card.damage_type, monster_card.fk_user_id, monster_card.fk_package_id, monster_card.defence
                 FROM mtcg.monster_card
-                WHERE fk_user_id = ? AND in_deck = true 
+                WHERE fk_user_id = ? AND in_deck = true
                 """)) {
             preparedStatement.setLong(1, userId);
 
@@ -231,7 +231,7 @@ public class CardRepositoryImpl implements CardRepository {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_chance
                 FROM mtcg.spell_card
-                WHERE fk_user_id = ? AND in_deck = true 
+                WHERE fk_user_id = ? AND in_deck = true
                 """)) {
             preparedStatement.setLong(1, userId);
 
@@ -254,6 +254,46 @@ public class CardRepositoryImpl implements CardRepository {
             throw new DataAccessException("Select failed!", e);
         }
 
-        return Stream.concat(monsterCards.stream(), spellCards.stream()).toList();
+        return new ArrayList<>(Stream.concat(monsterCards.stream(), spellCards.stream()).toList());
+    }
+
+    @Override
+    public void resetDeckOfUser(long userId) {
+        log.debug("Trying to reset deck of user {}", userId);
+        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                UPDATE mtcg.card
+                SET in_deck = false
+                WHERE fk_user_id = ?;
+                """)) {
+
+            preparedStatement.setLong(1, userId);
+
+            preparedStatement.executeUpdate();
+            unitOfWork.commitTransaction();
+        } catch (SQLException e) {
+            log.error("Could not remove card from deck due to a sql exception");
+            throw new DataAccessException("Update failed!", e);
+        }
+    }
+
+    @Override
+    public void configureDeckOfUser(List<Card> cards) {
+        log.debug("Trying to add cards {} to deck", cards);
+        for(Card card : cards) {
+            try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                UPDATE mtcg.card
+                SET in_deck = true
+                WHERE id = ?;
+                """)) {
+
+                preparedStatement.setLong(1, card.getId());
+
+                preparedStatement.executeUpdate();
+                unitOfWork.commitTransaction();
+            } catch (SQLException e) {
+                log.error("Could not add card to deck due to a sql exception");
+                throw new DataAccessException("Update failed!", e);
+            }
+        }
     }
 }
