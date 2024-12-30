@@ -7,6 +7,7 @@ import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.httpserver.server.RestController;
 import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
+import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UnauthorizedException;
 import at.fhtw.mtcgapp.service.exception.ValidationException;
 import jakarta.validation.ConstraintViolation;
@@ -37,6 +38,10 @@ public abstract class AbstractController implements RestController {
         catch (UnauthorizedException e) {
             log.trace("Handling unauthorized exception of type {}", e.getClass());
             return new Response(HttpStatus.UNAUTHORIZED, ContentType.PLAIN_TEXT, e.getMessage());
+        }
+        catch (ForbiddenException e) {
+            log.trace("Handling forbidden exception of type {}", e.getClass());
+            return new Response(HttpStatus.FORBIDDEN, ContentType.PLAIN_TEXT, e.getMessage());
         }
         catch (Exception e) {
             log.trace("Handling exception of type {}", e.getClass());

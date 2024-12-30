@@ -4,6 +4,7 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,12 +27,67 @@ import static org.mockito.Mockito.when;
 public class UserServiceTest {
     private UserService userService;
     @Mock
+    private AuthenticationService authenticationService;
+    @Mock
     private UserRepository userRepository;
     private Base64.Encoder encoder = Base64.getEncoder();
 
     @BeforeEach
     void setUp(){
-        userService = new UserServiceImpl(userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
+        userService = new UserServiceImpl(authenticationService, userRepository, Validation.buildDefaultValidatorFactory().getValidator(), encoder);
+    }
+
+    @Test
+    void ensureGetUserWorksProperly() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+
+        // When
+        UserDto returned = userService.getUser(authToken, "Thomas");
+
+        // Then
+        assertThat(returned).isEqualTo(new UserDto(user));
+    }
+
+    @Test
+    void ensureGetUserThrowsForbiddenExceptionWhenUsernameDoesNotMatch() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+
+        // When
+        assertThrows(ForbiddenException.class, () -> userService.getUser(authToken, "Tom"));
     }
 
     @Test

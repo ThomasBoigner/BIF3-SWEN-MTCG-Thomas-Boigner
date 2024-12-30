@@ -4,6 +4,8 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
+import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -20,12 +22,22 @@ import java.util.UUID;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final Validator validator;
     private final Base64.Encoder encoder;
 
     public UserDto getUser(String authToken, String username) {
-        throw new UnsupportedOperationException("not implemented yet");
+        log.debug("Trying to get user {} with auth token {}", username, authToken);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        if (!user.getUsername().equals(username)) {
+            throw ForbiddenException.forbidden();
+        }
+
+        log.info("Retrieved user {}", user);
+        return new UserDto(user);
     }
 
     public UserDto createUser(CreateUserCommand command) {

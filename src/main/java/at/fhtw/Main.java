@@ -41,7 +41,7 @@ public class Main {
         PackageService packageService = new PackageServiceImpl(authenticationService, packageRepository, cardRepository, userRepository, validator);
         CardService cardService = new CardServiceImpl(cardRepository, authenticationService);
 
-        router.addService("/users", new UserController(new UserServiceImpl(userRepository, validator, encoder), objectMapper));
+        router.addService("/users", new UserController(new UserServiceImpl(authenticationService, userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));
         router.addService("/packages", new PackageController(packageService, objectMapper));
         router.addService("/transactions", new TransactionsController(packageService));

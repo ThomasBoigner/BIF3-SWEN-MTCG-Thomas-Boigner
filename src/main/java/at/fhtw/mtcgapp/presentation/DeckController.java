@@ -46,19 +46,19 @@ public class DeckController extends AbstractController {
 
         List<CardDto> cardDtos = cardService.getDeckOfUser(extractAuthToken(request.getHeaderMap()));
 
-        String responseBody;
+        if(request.getParams() != null && request.getParams().contains("format=plain")) {
+            return new Response(HttpStatus.OK, ContentType.PLAIN_TEXT, cardDtos.toString());
+        }
+
+        String json;
         try {
-            if(request.getParams() != null && request.getParams().contains("format=plain")) {
-                responseBody = cardDtos.toString();
-            } else {
-                responseBody = objectMapper.writeValueAsString(cardDtos);
-            }
+            json = objectMapper.writeValueAsString(cardDtos);
         } catch (JsonProcessingException e) {
             log.error("Could not serialize the card dtos!", e);
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new Response(HttpStatus.OK, ContentType.JSON, responseBody);
+        return new Response(HttpStatus.OK, ContentType.JSON, json);
     }
 
     private Response configureDeck(Request request) {
