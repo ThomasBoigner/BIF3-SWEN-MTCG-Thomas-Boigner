@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 
@@ -60,9 +61,9 @@ public class DeckController extends AbstractController {
         log.debug("Incoming http PUT request {}", request);
         Objects.requireNonNull(request.getBody(), "Body must not be null!");
 
-        List<String> cardIds;
+        List<UUID> cardIds;
         try {
-            cardIds = objectMapper.readValue(request.getBody(), objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
+            cardIds = objectMapper.readValue(request.getBody(), objectMapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
         } catch (JsonMappingException e) {
             log.warn("Request body with wrong format was received {}!", request.getBody());
             return new Response(HttpStatus.BAD_REQUEST);

@@ -9,4 +9,6 @@ public interface CardRepository {
     Card updateCard(Card card);
     List<Card> getCardsOfUser(long userId);
     List<Card> getCardsInDeckOfUser(long userId);
+    void resetDeckOfUser(long userId);
+    void configureDeckOfUser(List<Card> cardIds);
 }

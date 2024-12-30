@@ -80,7 +80,7 @@ public class DeckControllerTest {
         HeaderMap headerMap = new HeaderMap();
         headerMap.ingest("Authorization:Bearer Thomas-mtgcToken");
 
-        List<String> cardIds = List.of("aa9999a0-734c-49c6-8f4a-651864b14e62", "d6e9c720-9b5a-40c7-a6b2-bc34752e3463", "d60e23cf-2238-4d49-844f-c7589ee5342e", "02a9c76e-b17d-427f-9240-2dd49b0d3bfd");
+        List<UUID> cardIds = List.of(UUID.fromString("aa9999a0-734c-49c6-8f4a-651864b14e62"), UUID.fromString("d6e9c720-9b5a-40c7-a6b2-bc34752e3463"), UUID.fromString("d60e23cf-2238-4d49-844f-c7589ee5342e"), UUID.fromString("02a9c76e-b17d-427f-9240-2dd49b0d3bfd"));
 
         Request request = Request.builder()
                 .method(Method.PUT)

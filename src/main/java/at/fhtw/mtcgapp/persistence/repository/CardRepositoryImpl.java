@@ -256,4 +256,14 @@ public class CardRepositoryImpl implements CardRepository {
 
         return Stream.concat(monsterCards.stream(), spellCards.stream()).toList();
     }
+
+    @Override
+    public void resetDeckOfUser(long userId) {
+
+    }
+
+    @Override
+    public void configureDeckOfUser(List<Card> cardIds) {
+
+    }
 }

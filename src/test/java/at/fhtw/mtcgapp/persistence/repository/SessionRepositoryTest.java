@@ -44,7 +44,7 @@ public class SessionRepositoryTest {
     void setUp() {
         UnitOfWork unitOfWork = new UnitOfWork();
         userRepository = new UserRepositoryImpl(unitOfWork);
-        sessionRepository = new SessionRepositoryImpl(unitOfWork);
+        sessionRepository = new SessionRepositoryImpl(unitOfWork, new CardRepositoryImpl(unitOfWork));
     }
 
     @Test

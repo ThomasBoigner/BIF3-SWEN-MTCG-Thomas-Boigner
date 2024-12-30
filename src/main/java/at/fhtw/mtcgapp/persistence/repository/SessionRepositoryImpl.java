@@ -19,6 +19,7 @@ import java.util.UUID;
 @Slf4j
 public class SessionRepositoryImpl implements SessionRepository {
     private final UnitOfWork unitOfWork;
+    private final CardRepository cardRepository;
 
     @Override
     public Optional<User> findUserByToken(String token) {
@@ -47,6 +48,11 @@ public class SessionRepositoryImpl implements SessionRepository {
                         .stack(new ArrayList<>())
                         .trades(new ArrayList<>())
                         .build();
+            }
+
+            if (user != null) {
+                user.setStack(cardRepository.getCardsOfUser(user.getId()));
+                user.setDeck(cardRepository.getCardsInDeckOfUser(user.getId()));
             }
 
             return Optional.ofNullable(user);
