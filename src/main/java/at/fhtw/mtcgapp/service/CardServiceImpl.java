@@ -52,10 +52,8 @@ public class CardServiceImpl implements CardService{
 
         User user = authenticationService.getCurrentlyLoggedInUser(authToken);
 
-        cardRepository.resetDeckOfUser(user.getId());
         user.getStack().addAll(user.getDeck());
         user.getDeck().clear();
-
 
         List<Card> newDeck = user.getStack().stream().filter(card -> cardIds.contains(card.getToken())).toList();
         if (newDeck.size() != 4) {
@@ -66,7 +64,9 @@ public class CardServiceImpl implements CardService{
         user.getStack().removeIf(card -> cardIds.contains(card.getToken()));
         user.setDeck(newDeck);
 
-        log.info("Configured deck to contain cards {}", user.getDeck());
+        cardRepository.resetDeckOfUser(user.getId());
         cardRepository.configureDeckOfUser(user.getDeck());
+
+        log.info("Configured deck to contain cards {}", user.getDeck());
     }
 }
