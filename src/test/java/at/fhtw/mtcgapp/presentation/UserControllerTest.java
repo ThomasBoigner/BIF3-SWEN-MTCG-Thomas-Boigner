@@ -6,6 +6,7 @@ import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.mtcgapp.service.UserService;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
+import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -134,5 +135,74 @@ public class UserControllerTest {
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(response.getContentType()).isEqualTo("text/plain");
         assertThat(response.getContent()).isEqualTo("Body must not be null!");
+    }
+
+    @Test
+    void ensureUpdateUserWorksProperly() throws JsonProcessingException {
+        // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtcgToken");
+
+        UpdateUserCommand userCommand = UpdateUserCommand.builder()
+                .name("Thomas")
+                .bio("me codin...")
+                .image(":^)")
+                .build();
+
+        Request request = Request.builder()
+                .method(Method.PUT)
+                .pathname("/users/Thomas")
+                .headerMap(headerMap)
+                .pathParts(List.of("users", "Thomas"))
+                .body(objectMapper.writeValueAsString(userCommand))
+                .build();
+
+        // When
+        Response response = userController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void ensureUpdateUserReturnsStatus400WhenCommandCanNotBeParsed() {
+        // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtcgToken");
+
+        Request request = Request.builder()
+                .method(Method.PUT)
+                .pathname("/users/Thomas")
+                .headerMap(headerMap)
+                .pathParts(List.of("users", "Thomas"))
+                .body("")
+                .build();
+
+        // When
+        Response response = userController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void ensureUpdateUserReturnsStatus400WhenBodyIsNull() {
+        // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtcgToken");
+
+        Request request = Request.builder()
+                .method(Method.PUT)
+                .pathname("/users/Thomas")
+                .headerMap(headerMap)
+                .pathParts(List.of("users", "Thomas"))
+                .body(null)
+                .build();
+
+        // When
+        Response response = userController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 }

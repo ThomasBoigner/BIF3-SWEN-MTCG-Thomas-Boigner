@@ -7,6 +7,7 @@ import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.mtcgapp.service.UserService;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
+import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -30,6 +31,9 @@ public class UserController extends AbstractController {
         }
         if (request.getMethod() == Method.POST && request.getPathname().equals("/users")) {
             return handleServiceErrors(request, this::createUser);
+        }
+        if (request.getMethod() == Method.PUT && request.getPathname().contains("/users") && request.getPathParts().size() == 2) {
+            return handleServiceErrors(request, this::updateUser);
         }
 
         return new Response(
@@ -81,5 +85,25 @@ public class UserController extends AbstractController {
         }
 
         return new Response(HttpStatus.CREATED, ContentType.JSON, json);
+    }
+
+    private Response updateUser(Request request) {
+        log.debug("Incoming http PUT request {}", request);
+        Objects.requireNonNull(request.getBody(), "Body must not be null!");
+
+        UpdateUserCommand command;
+        try {
+            command = objectMapper.readValue(request.getBody(), UpdateUserCommand.class);
+        } catch (JsonMappingException e) {
+            log.warn("Request body with wrong format was received {}!", request.getBody());
+            return new Response(HttpStatus.BAD_REQUEST);
+        } catch (JsonProcessingException e) {
+            log.warn("Could not deserialize the update user command {}!", request.getBody());
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        userService.updateUser(extractAuthToken(request.getHeaderMap()), request.getPathParts().get(1), command);
+
+        return new Response(HttpStatus.OK);
     }
 }

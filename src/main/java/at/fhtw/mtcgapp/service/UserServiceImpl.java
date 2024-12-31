@@ -3,6 +3,7 @@ package at.fhtw.mtcgapp.service;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
+import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
 import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
 import at.fhtw.mtcgapp.service.exception.ForbiddenException;
@@ -71,5 +72,10 @@ public class UserServiceImpl implements UserService {
 
         log.info("Created user {}", user);
         return new UserDto(userRepository.save(user));
+    }
+
+    @Override
+    public void updateUser(String authToken, String username, UpdateUserCommand command) {
+        throw new UnsupportedOperationException();
     }
 }
