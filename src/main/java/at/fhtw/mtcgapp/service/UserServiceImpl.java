@@ -3,7 +3,10 @@ package at.fhtw.mtcgapp.service;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
+import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
+import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -20,16 +23,30 @@ import java.util.UUID;
 
 @Slf4j
 public class UserServiceImpl implements UserService {
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final Validator validator;
     private final Base64.Encoder encoder;
+
+    public UserDto getUser(String authToken, String username) {
+        log.debug("Trying to get user {} with auth token {}", username, authToken);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        if (!user.getUsername().equals(username)) {
+            throw ForbiddenException.forbidden();
+        }
+
+        log.info("Retrieved user {}", user);
+        return new UserDto(user);
+    }
 
     public UserDto createUser(CreateUserCommand command) {
         log.debug("Trying to create user with command {}", command);
 
         Set<ConstraintViolation<CreateUserCommand>> violations = validator.validate(command);
         if (!violations.isEmpty()) {
-            log.warn("Input validation for user failed!");
+            log.warn("Input validation for create user failed!");
             throw new ConstraintViolationException(violations);
         }
 
@@ -55,5 +72,29 @@ public class UserServiceImpl implements UserService {
 
         log.info("Created user {}", user);
         return new UserDto(userRepository.save(user));
+    }
+
+    @Override
+    public void updateUser(String authToken, String username, UpdateUserCommand command) {
+        log.debug("Trying to update user {} with auth token {} and command {}", username, authToken, command);
+
+        Set<ConstraintViolation<UpdateUserCommand>> violations = validator.validate(command);
+        if (!violations.isEmpty()) {
+            log.warn("Input validation for update user failed!");
+            throw new ConstraintViolationException(violations);
+        }
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        if (!user.getUsername().equals(username)) {
+            throw ForbiddenException.forbidden();
+        }
+
+        user.setUsername(command.name());
+        user.setBio(command.bio());
+        user.setImage(command.image());
+
+        userRepository.updateUser(user);
+        log.info("Updated user {}", user);
     }
 }

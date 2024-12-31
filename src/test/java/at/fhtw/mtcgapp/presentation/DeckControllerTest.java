@@ -109,7 +109,7 @@ public class DeckControllerTest {
         // Then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getMessage()).isEqualTo("OK");
-        assertThat(response.getContentType()).isEqualTo("application/json");
+        assertThat(response.getContentType()).isEqualTo("text/plain");
         assertThat(response.getContent()).isEqualTo(cardDtos.toString());
     }
 
