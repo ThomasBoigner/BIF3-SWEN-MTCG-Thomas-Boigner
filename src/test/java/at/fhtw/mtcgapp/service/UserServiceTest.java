@@ -3,6 +3,7 @@ package at.fhtw.mtcgapp.service;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
+import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
 import at.fhtw.mtcgapp.service.dto.UserDto;
 import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
@@ -136,5 +137,102 @@ public class UserServiceTest {
 
         // Assert
         assertThrows(ConstraintViolationException.class, () -> userService.createUser(command));
+    }
+
+    @Test
+    void ensureUpdateUserWorksProperly(){
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        UpdateUserCommand userCommand = UpdateUserCommand.builder()
+                .name("Domas")
+                .bio("me codin...")
+                .image(":^)")
+                .build();
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+
+        // When
+        userService.updateUser(authToken, "Thomas", userCommand);
+
+        // Then
+        assertThat(user.getUsername()).isEqualTo("Domas");
+        assertThat(user.getBio()).isEqualTo("me codin...");
+        assertThat(user.getImage()).isEqualTo(":^)");
+    }
+
+    @Test
+    void ensureUpdateUserThrowsConstraintViolationExceptionWhenCommandViolatesConstraint(){
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        UpdateUserCommand userCommand = UpdateUserCommand.builder()
+                .name("")
+                .bio(null)
+                .image(null)
+                .build();
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        // When
+        assertThrows(ConstraintViolationException.class, () -> userService.updateUser(authToken, "Thomas", userCommand));
+    }
+
+    @Test
+    void ensureUpdateUserThrowsForbiddenExceptionWhenUsernameDoesNotMatch() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        UpdateUserCommand userCommand = UpdateUserCommand.builder()
+                .name("Domas")
+                .bio("me codin...")
+                .image(":^)")
+                .build();
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .battlesFought(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+
+        // When
+        assertThrows(ForbiddenException.class, () -> userService.updateUser(authToken, "Momas", userCommand));
     }
 }

@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
         Set<ConstraintViolation<CreateUserCommand>> violations = validator.validate(command);
         if (!violations.isEmpty()) {
-            log.warn("Input validation for user failed!");
+            log.warn("Input validation for create user failed!");
             throw new ConstraintViolationException(violations);
         }
 
@@ -76,6 +76,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(String authToken, String username, UpdateUserCommand command) {
-        throw new UnsupportedOperationException();
+        log.debug("Trying to update user {} with auth token {} and command {}", username, authToken, command);
+
+        Set<ConstraintViolation<UpdateUserCommand>> violations = validator.validate(command);
+        if (!violations.isEmpty()) {
+            log.warn("Input validation for update user failed!");
+            throw new ConstraintViolationException(violations);
+        }
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        if (!user.getUsername().equals(username)) {
+            throw ForbiddenException.forbidden();
+        }
+
+        user.setUsername(command.name());
+        user.setBio(command.bio());
+        user.setImage(command.image());
+
+        userRepository.updateUser(user);
+        log.info("Updated user {}", user);
     }
 }
