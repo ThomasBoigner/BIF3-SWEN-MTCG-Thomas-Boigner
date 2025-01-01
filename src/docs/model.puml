@@ -17,7 +17,8 @@ class User {
     image: String
     coins: int
     elo: int
-    battlesFought: int
+    wins: int
+    losses: int
 
     stack: List<Card>
     deck: List<Card>

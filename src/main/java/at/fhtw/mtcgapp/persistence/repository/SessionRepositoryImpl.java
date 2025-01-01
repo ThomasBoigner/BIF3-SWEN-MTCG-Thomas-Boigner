@@ -25,7 +25,7 @@ public class SessionRepositoryImpl implements SessionRepository {
     public Optional<User> findUserByToken(String token) {
         log.debug("Trying to find user with auth token {}", token);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".battles_fought, "user".coins
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins
                 FROM mtcg.session inner join mtcg.user on "session".fk_user_id = "user".id
                 WHERE session.token = ?
                 """)) {
@@ -42,7 +42,8 @@ public class SessionRepositoryImpl implements SessionRepository {
                         .bio(resultSet.getString("bio"))
                         .image(resultSet.getString("image"))
                         .elo(resultSet.getInt("elo"))
-                        .battlesFought(resultSet.getInt("battles_fought"))
+                        .wins(resultSet.getInt("wins"))
+                        .losses(resultSet.getInt("losses"))
                         .coins(resultSet.getInt("coins"))
                         .deck(new ArrayList<>())
                         .stack(new ArrayList<>())

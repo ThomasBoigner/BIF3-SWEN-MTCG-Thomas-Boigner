@@ -8,7 +8,7 @@ import at.fhtw.httpserver.server.Response;
 import at.fhtw.mtcgapp.service.UserService;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
-import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.dto.UserDataDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +46,7 @@ public class UserController extends AbstractController {
     private Response getUser(Request request) {
         log.debug("Incoming http GET request {}", request);
 
-        UserDto userDto = userService.getUser(extractAuthToken(request.getHeaderMap()), request.getPathParts().get(1));
+        UserDataDto userDto = userService.getUser(extractAuthToken(request.getHeaderMap()), request.getPathParts().get(1));
 
         String json;
         try {
@@ -74,7 +74,7 @@ public class UserController extends AbstractController {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        UserDto userDto = userService.createUser(command);
+        UserDataDto userDto = userService.createUser(command);
 
         String json;
         try {

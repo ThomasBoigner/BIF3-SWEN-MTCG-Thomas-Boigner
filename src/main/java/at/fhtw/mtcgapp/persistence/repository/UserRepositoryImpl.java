@@ -40,7 +40,8 @@ public class UserRepositoryImpl implements UserRepository {
                         .bio(resultSet.getString("bio"))
                         .image(resultSet.getString("image"))
                         .elo(resultSet.getInt("elo"))
-                        .battlesFought(resultSet.getInt("battles_fought"))
+                        .wins(resultSet.getInt("wins"))
+                        .losses(resultSet.getInt("losses"))
                         .coins(resultSet.getInt("coins"))
                         .deck(new ArrayList<>())
                         .stack(new ArrayList<>())
@@ -59,8 +60,8 @@ public class UserRepositoryImpl implements UserRepository {
     public User save(User user) {
         log.debug("Trying to save user {}", user);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, battles_fought)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, wins, losses)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id;
                 """)) {
             preparedStatement.setObject(1, user.getToken());
@@ -70,7 +71,8 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setString(5, user.getImage());
             preparedStatement.setInt(6, user.getCoins());
             preparedStatement.setInt(7, user.getElo());
-            preparedStatement.setInt(8, user.getBattlesFought());
+            preparedStatement.setInt(8, user.getWins());
+            preparedStatement.setInt(9, user.getLosses());
 
             ResultSet resultSet = preparedStatement.executeQuery();
             resultSet.next();
@@ -115,7 +117,7 @@ public class UserRepositoryImpl implements UserRepository {
         log.debug("Trying to update user {}", user);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 UPDATE mtcg.user
-                SET token = ?, username = ?, password = ?, bio = ?, image = ?, coins = ?, elo = ?, battles_fought = ?
+                SET token = ?, username = ?, password = ?, bio = ?, image = ?, coins = ?, elo = ?, wins = ?, losses = ?
                 WHERE id = ?
                 """)) {
             preparedStatement.setObject(1, user.getToken());
@@ -125,8 +127,9 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setString(5, user.getImage());
             preparedStatement.setInt(6, user.getCoins());
             preparedStatement.setInt(7, user.getElo());
-            preparedStatement.setInt(8, user.getBattlesFought());
-            preparedStatement.setLong(9, user.getId());
+            preparedStatement.setInt(8, user.getWins());
+            preparedStatement.setInt(9, user.getLosses());
+            preparedStatement.setLong(10, user.getId());
 
             preparedStatement.executeUpdate();
             return user;

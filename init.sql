@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS mtcg."user"
     image character varying(8) COLLATE pg_catalog."default",
     coins integer,
     elo integer,
-    battles_fought integer,
+    wins integer,
+    losses integer,
     UNIQUE (token),
     UNIQUE (username)
 );
