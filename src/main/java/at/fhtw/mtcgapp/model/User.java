@@ -36,7 +36,6 @@ public class User {
                ", coins=" + coins +
                ", image='" + image + '\'' +
                ", bio='" + bio + '\'' +
-               ", password='" + password + '\'' +
                ", username='" + username + '\'' +
                ", token=" + token +
                ", id=" + id +

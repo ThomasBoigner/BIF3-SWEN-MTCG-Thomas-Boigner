@@ -1,5 +1,6 @@
 package at.fhtw.mtcgapp.service;
 
+import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.dto.UserStatsDto;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,11 @@ public class StatsServiceImpl implements StatsService{
 
     @Override
     public UserStatsDto getUserStats(String authToken) {
-        return null;
+        log.debug("Trying to get stats of user with auth token {}", authToken);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        log.info("Retrieved user {}", user);
+        return new UserStatsDto(user);
     }
 }
