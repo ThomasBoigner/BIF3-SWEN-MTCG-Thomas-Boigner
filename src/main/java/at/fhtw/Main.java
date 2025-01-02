@@ -49,6 +49,7 @@ public class Main {
         router.addService("/cards", new CardController(cardService, objectMapper));
         router.addService("/deck", new DeckController(cardService, objectMapper));
         router.addService("/stats", new StatsController(statsService, objectMapper));
+        router.addService("/scoreboard", new ScoreBoardController(statsService, objectMapper));
 
         return router;
     }

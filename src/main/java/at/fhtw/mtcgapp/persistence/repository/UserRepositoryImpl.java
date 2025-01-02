@@ -24,7 +24,7 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> findByUsername(String username) {
         log.debug("Trying to find user with username: {}", username);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                Select *
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins
                 From mtcg.user
                 where username = ?
                 """)) {
@@ -143,6 +143,38 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> findAllUsers() {
-        return List.of();
+        log.debug("Trying to find all users");
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins
+                FROM mtcg.user
+                """)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<User> users = new ArrayList<>();
+            while (resultSet.next()) {
+                users.add(
+                        User.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .username(resultSet.getString("username"))
+                        .password(resultSet.getString("password"))
+                        .bio(resultSet.getString("bio"))
+                        .image(resultSet.getString("image"))
+                        .elo(resultSet.getInt("elo"))
+                        .wins(resultSet.getInt("wins"))
+                        .losses(resultSet.getInt("losses"))
+                        .coins(resultSet.getInt("coins"))
+                        .deck(new ArrayList<>())
+                        .stack(new ArrayList<>())
+                        .trades(new ArrayList<>())
+                        .build()
+                );
+            }
+
+            return users;
+        } catch (SQLException e) {
+            log.error("Could not get users due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
     }
 }

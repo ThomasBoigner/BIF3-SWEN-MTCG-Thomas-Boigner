@@ -13,10 +13,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static java.util.Map.entry;
@@ -197,5 +194,50 @@ public class UserRepositoryTest {
 
         // Then
         assertThat(returned).isEqualTo(user);
+    }
+
+    @Test
+    void ensureFindAllUsersWorksProperly() {
+        // Given
+        User user1 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(100)
+                .wins(4)
+                .losses(3)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        userRepository.save(user1);
+
+        User user2 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Max")
+                .password("pwd")
+                .bio("bio2")
+                .image("image2")
+                .coins(40)
+                .elo(400)
+                .wins(8)
+                .losses(2)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        userRepository.save(user2);
+
+        // When
+        List<User> returned = userRepository.findAllUsers();
+
+        assertThat(returned.size()).isEqualTo(2);
+        assertThat(returned).contains(user1);
+        assertThat(returned).contains(user2);
     }
 }
