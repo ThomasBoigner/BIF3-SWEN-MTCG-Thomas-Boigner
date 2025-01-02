@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -138,5 +139,10 @@ public class UserRepositoryImpl implements UserRepository {
             log.error("Could not update user due to a sql exception");
             throw new DataAccessException("Update failed!", e);
         }
+    }
+
+    @Override
+    public List<User> findAllUsers() {
+        return List.of();
     }
 }

@@ -27,6 +27,12 @@ public class StatsServiceImpl implements StatsService{
 
     @Override
     public List<UserStatsDto> getScoreBoard(String authToken) {
-        return List.of();
+        log.debug("Trying to get scoreboard with auth token {}", authToken);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+        List<UserStatsDto> scoreBoard = userRepository.findAllUsers().stream().map(UserStatsDto::new).toList();
+
+        log.info("User {} retrieved scoreboard with {} entries", user.getUsername(), scoreBoard.size());
+        return scoreBoard;
     }
 }
