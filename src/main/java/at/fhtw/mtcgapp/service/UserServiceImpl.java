@@ -4,8 +4,7 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
-import at.fhtw.mtcgapp.service.dto.UserDto;
-import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
+import at.fhtw.mtcgapp.service.dto.UserDataDto;
 import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
 import jakarta.validation.ConstraintViolation;
@@ -28,7 +27,7 @@ public class UserServiceImpl implements UserService {
     private final Validator validator;
     private final Base64.Encoder encoder;
 
-    public UserDto getUser(String authToken, String username) {
+    public UserDataDto getUser(String authToken, String username) {
         log.debug("Trying to get user {} with auth token {}", username, authToken);
 
         User user = authenticationService.getCurrentlyLoggedInUser(authToken);
@@ -38,10 +37,10 @@ public class UserServiceImpl implements UserService {
         }
 
         log.info("Retrieved user {}", user);
-        return new UserDto(user);
+        return new UserDataDto(user);
     }
 
-    public UserDto createUser(CreateUserCommand command) {
+    public UserDataDto createUser(CreateUserCommand command) {
         log.debug("Trying to create user with command {}", command);
 
         Set<ConstraintViolation<CreateUserCommand>> violations = validator.validate(command);
@@ -62,7 +61,8 @@ public class UserServiceImpl implements UserService {
                 .bio("")
                 .image("")
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .coins(20)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
         log.trace("Mapped command {} to user object {}", command, user);
 
         log.info("Created user {}", user);
-        return new UserDto(userRepository.save(user));
+        return new UserDataDto(userRepository.save(user));
     }
 
     @Override

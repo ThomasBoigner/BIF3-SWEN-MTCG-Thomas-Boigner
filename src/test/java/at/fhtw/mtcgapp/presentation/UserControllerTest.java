@@ -7,7 +7,7 @@ import at.fhtw.httpserver.server.Response;
 import at.fhtw.mtcgapp.service.UserService;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
-import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.dto.UserDataDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +41,10 @@ public class UserControllerTest {
         HeaderMap headerMap = new HeaderMap();
         headerMap.ingest("Authorization:Bearer Thomas-mtcgToken");
 
-        UserDto userDto = UserDto.builder()
+        UserDataDto userDto = UserDataDto.builder()
                 .username("Thomas")
                 .bio("")
                 .image("")
-                .elo(0)
-                .battlesFought(0)
                 .coins(20)
                 .build();
 
@@ -82,12 +80,10 @@ public class UserControllerTest {
                 .body(objectMapper.writeValueAsString(userCommand))
                 .build();
 
-        UserDto userDto = UserDto.builder()
+        UserDataDto userDto = UserDataDto.builder()
                 .username("Thomas")
                 .bio("")
                 .image("")
-                .elo(0)
-                .battlesFought(0)
                 .coins(20)
                 .build();
 

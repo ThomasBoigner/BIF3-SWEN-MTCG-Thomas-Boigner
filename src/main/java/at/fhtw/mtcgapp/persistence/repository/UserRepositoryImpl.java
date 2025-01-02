@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> findByUsername(String username) {
         log.debug("Trying to find user with username: {}", username);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                Select *
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins
                 From mtcg.user
                 where username = ?
                 """)) {
@@ -40,7 +41,8 @@ public class UserRepositoryImpl implements UserRepository {
                         .bio(resultSet.getString("bio"))
                         .image(resultSet.getString("image"))
                         .elo(resultSet.getInt("elo"))
-                        .battlesFought(resultSet.getInt("battles_fought"))
+                        .wins(resultSet.getInt("wins"))
+                        .losses(resultSet.getInt("losses"))
                         .coins(resultSet.getInt("coins"))
                         .deck(new ArrayList<>())
                         .stack(new ArrayList<>())
@@ -59,8 +61,8 @@ public class UserRepositoryImpl implements UserRepository {
     public User save(User user) {
         log.debug("Trying to save user {}", user);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, battles_fought)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, wins, losses)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id;
                 """)) {
             preparedStatement.setObject(1, user.getToken());
@@ -70,7 +72,8 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setString(5, user.getImage());
             preparedStatement.setInt(6, user.getCoins());
             preparedStatement.setInt(7, user.getElo());
-            preparedStatement.setInt(8, user.getBattlesFought());
+            preparedStatement.setInt(8, user.getWins());
+            preparedStatement.setInt(9, user.getLosses());
 
             ResultSet resultSet = preparedStatement.executeQuery();
             resultSet.next();
@@ -115,7 +118,7 @@ public class UserRepositoryImpl implements UserRepository {
         log.debug("Trying to update user {}", user);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 UPDATE mtcg.user
-                SET token = ?, username = ?, password = ?, bio = ?, image = ?, coins = ?, elo = ?, battles_fought = ?
+                SET token = ?, username = ?, password = ?, bio = ?, image = ?, coins = ?, elo = ?, wins = ?, losses = ?
                 WHERE id = ?
                 """)) {
             preparedStatement.setObject(1, user.getToken());
@@ -125,8 +128,9 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setString(5, user.getImage());
             preparedStatement.setInt(6, user.getCoins());
             preparedStatement.setInt(7, user.getElo());
-            preparedStatement.setInt(8, user.getBattlesFought());
-            preparedStatement.setLong(9, user.getId());
+            preparedStatement.setInt(8, user.getWins());
+            preparedStatement.setInt(9, user.getLosses());
+            preparedStatement.setLong(10, user.getId());
 
             preparedStatement.executeUpdate();
             return user;
@@ -134,6 +138,43 @@ public class UserRepositoryImpl implements UserRepository {
             unitOfWork.rollbackTransaction();
             log.error("Could not update user due to a sql exception");
             throw new DataAccessException("Update failed!", e);
+        }
+    }
+
+    @Override
+    public List<User> findAllUsers() {
+        log.debug("Trying to find all users");
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins
+                FROM mtcg.user
+                """)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<User> users = new ArrayList<>();
+            while (resultSet.next()) {
+                users.add(
+                        User.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .username(resultSet.getString("username"))
+                        .password(resultSet.getString("password"))
+                        .bio(resultSet.getString("bio"))
+                        .image(resultSet.getString("image"))
+                        .elo(resultSet.getInt("elo"))
+                        .wins(resultSet.getInt("wins"))
+                        .losses(resultSet.getInt("losses"))
+                        .coins(resultSet.getInt("coins"))
+                        .deck(new ArrayList<>())
+                        .stack(new ArrayList<>())
+                        .trades(new ArrayList<>())
+                        .build()
+                );
+            }
+
+            return users;
+        } catch (SQLException e) {
+            log.error("Could not get users due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
         }
     }
 }

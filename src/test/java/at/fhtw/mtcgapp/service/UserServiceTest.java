@@ -4,7 +4,7 @@ import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
 import at.fhtw.mtcgapp.service.command.CreateUserCommand;
 import at.fhtw.mtcgapp.service.command.UpdateUserCommand;
-import at.fhtw.mtcgapp.service.dto.UserDto;
+import at.fhtw.mtcgapp.service.dto.UserDataDto;
 import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UserValidationException;
 import jakarta.validation.ConstraintViolationException;
@@ -52,7 +52,8 @@ public class UserServiceTest {
                 .image("image")
                 .coins(20)
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
@@ -60,10 +61,10 @@ public class UserServiceTest {
         when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
 
         // When
-        UserDto returned = userService.getUser(authToken, "Thomas");
+        UserDataDto returned = userService.getUser(authToken, "Thomas");
 
         // Then
-        assertThat(returned).isEqualTo(new UserDto(user));
+        assertThat(returned).isEqualTo(new UserDataDto(user));
     }
 
     @Test
@@ -80,7 +81,8 @@ public class UserServiceTest {
                 .image("image")
                 .coins(20)
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
@@ -102,15 +104,13 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
 
         // When
-        UserDto userDto = userService.createUser(command);
+        UserDataDto userDto = userService.createUser(command);
 
         // Then
         assertThat(userDto.id()).isNotNull();
         assertThat(userDto.username()).isEqualTo(command.username());
         assertThat(userDto.bio()).isEqualTo("");
         assertThat(userDto.image()).isEqualTo("");
-        assertThat(userDto.elo()).isEqualTo(0);
-        assertThat(userDto.battlesFought()).isEqualTo(0);
         assertThat(userDto.coins()).isEqualTo(20);
     }
 
@@ -159,7 +159,8 @@ public class UserServiceTest {
                 .image("image")
                 .coins(20)
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
@@ -195,7 +196,8 @@ public class UserServiceTest {
                 .image("image")
                 .coins(20)
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
@@ -225,7 +227,8 @@ public class UserServiceTest {
                 .image("image")
                 .coins(20)
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
