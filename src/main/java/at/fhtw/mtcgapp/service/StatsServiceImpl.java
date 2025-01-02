@@ -6,6 +6,8 @@ import at.fhtw.mtcgapp.service.dto.UserStatsDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 
 @Slf4j
@@ -21,5 +23,10 @@ public class StatsServiceImpl implements StatsService{
 
         log.info("Retrieved user {}", user);
         return new UserStatsDto(user);
+    }
+
+    @Override
+    public List<UserStatsDto> getScoreBoard(String authToken) {
+        return List.of();
     }
 }
