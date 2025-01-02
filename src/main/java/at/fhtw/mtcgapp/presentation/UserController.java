@@ -52,7 +52,7 @@ public class UserController extends AbstractController {
         try {
             json = objectMapper.writeValueAsString(userDto);
         } catch (JsonProcessingException e) {
-            log.error("Could not serialize the user dto!", e);
+            log.error("Could not serialize the user data dto!", e);
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
