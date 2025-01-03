@@ -1,5 +1,5 @@
 default:
-  image: maven:3.9.9-amazoncorretto-23-debian
+  image: maven:3.9.9
 
 stages:
   - build
@@ -32,3 +32,13 @@ test:
   script:
     - echo "Test App"
     - mvn test
+
+deploy-master:
+  image: docker:27
+  script:
+    - docker login
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - docker build -t "$CI_REGISTRY_IMAGE:${CI_COMMIT_SHA:0:8}" -f src/main/docker/Dockerfile .
+    - docker push "$CI_REGISTRY_IMAGE:${CI_COMMIT_SHA:0:8}"
+  only:
+    - master
