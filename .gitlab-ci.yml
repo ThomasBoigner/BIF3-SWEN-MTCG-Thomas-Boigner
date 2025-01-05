@@ -15,7 +15,7 @@ build:
   stage: build
   script:
     - echo "Build App"
-    - mvn clean install -Dmaven.test.skip=true
+    - ./mvnw clean install -Dmaven.test.skip=true
   artifacts:
     paths:
       - target/
@@ -25,13 +25,13 @@ lint:
   stage: lint
   script:
     - echo "Lint App"
-    - mvn pmd:check
+    - ./mvnw pmd:check
 
 test:
   stage: test
   script:
     - echo "Test App"
-    - mvn test
+    - ./mvnw test
 
 deploy-master:
   image: docker:27
