@@ -22,6 +22,7 @@ public class User {
     private int elo;
     private int wins;
     private int losses;
+    private boolean inQueue;
 
     private List<Card> stack;
     private List<Card> deck;

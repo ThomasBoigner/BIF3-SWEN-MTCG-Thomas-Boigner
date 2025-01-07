@@ -11,4 +11,5 @@ public interface UserRepository {
     boolean existsByUsername(String username);
     User updateUser(User user);
     List<User> findAllUsers();
+    Optional<User> getUserInQueue();
 }

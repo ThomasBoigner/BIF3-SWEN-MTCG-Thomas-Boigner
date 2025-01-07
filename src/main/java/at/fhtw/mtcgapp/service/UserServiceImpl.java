@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
                 .wins(0)
                 .losses(0)
                 .coins(20)
+                .inQueue(false)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
                 .trades(new ArrayList<>())
