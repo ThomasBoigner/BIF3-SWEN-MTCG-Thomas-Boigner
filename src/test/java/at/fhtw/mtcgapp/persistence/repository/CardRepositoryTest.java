@@ -71,7 +71,7 @@ public class CardRepositoryTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         // When
@@ -109,7 +109,7 @@ public class CardRepositoryTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
         cardRepository.save(spellCard);
 
@@ -154,7 +154,7 @@ public class CardRepositoryTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .user(user)
                 .build();
         cardRepository.save(spellCard);
@@ -202,7 +202,7 @@ public class CardRepositoryTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .user(user)
                 .build();
         cardRepository.save(spellCard);
@@ -252,7 +252,7 @@ public class CardRepositoryTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .user(user)
                 .build();
         cardRepository.save(spellCard);
@@ -297,7 +297,7 @@ public class CardRepositoryTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .user(user)
                 .build();
         cardRepository.save(spellCard);

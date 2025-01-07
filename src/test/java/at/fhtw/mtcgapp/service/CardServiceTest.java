@@ -52,7 +52,7 @@ public class CardServiceTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         User user = User.builder()
@@ -100,7 +100,7 @@ public class CardServiceTest {
                 .name("FireSpell")
                 .damage(15)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         User user = User.builder()
@@ -166,7 +166,7 @@ public class CardServiceTest {
                 .name("FireSpell")
                 .damage(25.0)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         SpellCard card5 = SpellCard.builder()
@@ -174,7 +174,7 @@ public class CardServiceTest {
                 .name("WaterSpell")
                 .damage(20.0)
                 .damageType(DamageType.WATER)
-                .criticalHitChance(0.1)
+                .criticalHitMultiplier(0.1)
                 .build();
 
         User user = User.builder()
@@ -250,7 +250,7 @@ public class CardServiceTest {
                 .name("FireSpell")
                 .damage(25.0)
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         SpellCard card5 = SpellCard.builder()
@@ -258,7 +258,7 @@ public class CardServiceTest {
                 .name("WaterSpell")
                 .damage(20.0)
                 .damageType(DamageType.WATER)
-                .criticalHitChance(0.1)
+                .criticalHitMultiplier(0.1)
                 .build();
 
         User user = User.builder()

@@ -64,7 +64,7 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setString(4, card.getDamageType().getDbValue());
                 preparedStatement.setObject(5, (card.getUser() != null) ? card.getUser().getId() : null);
                 preparedStatement.setObject(6, (card.getCardPackage() != null) ? card.getCardPackage().getId() : null);
-                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitChance());
+                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitMultiplier());
 
                 ResultSet resultSet = preparedStatement.executeQuery();
                 resultSet.next();
@@ -120,7 +120,7 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setString(4, card.getDamageType().getDbValue());
                 preparedStatement.setObject(5, (card.getUser() != null) ? card.getUser().getId() : null);
                 preparedStatement.setObject(6, (card.getCardPackage() != null) ? card.getCardPackage().getId() : null);
-                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitChance());
+                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitMultiplier());
                 preparedStatement.setLong(8, card.getId());
 
                 preparedStatement.executeUpdate();
@@ -185,7 +185,7 @@ public class CardRepositoryImpl implements CardRepository {
                         .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
                         .user(null)
                         .cardPackage(null)
-                        .criticalHitChance(resultSet.getDouble("critical_hit_chance"))
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_chance"))
                         .build());
             }
         } catch (SQLException e) {
@@ -246,7 +246,7 @@ public class CardRepositoryImpl implements CardRepository {
                         .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
                         .user(null)
                         .cardPackage(null)
-                        .criticalHitChance(resultSet.getDouble("critical_hit_chance"))
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_chance"))
                         .build());
             }
         } catch (SQLException e) {

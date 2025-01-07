@@ -11,9 +11,6 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -28,7 +25,6 @@ import java.util.function.Consumer;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @Testcontainers
 public class PackageRepositoryTest {
@@ -101,7 +97,7 @@ public class PackageRepositoryTest {
                 .damage(15)
                 .damageType(DamageType.FIRE)
                 .cardPackage(pkg)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         pkg.setCards(List.of(spellCard, monsterCard));
@@ -151,7 +147,7 @@ public class PackageRepositoryTest {
                 .damage(15)
                 .damageType(DamageType.FIRE)
                 .cardPackage(pkg)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         pkg.setCards(List.of(spellCard, monsterCard));

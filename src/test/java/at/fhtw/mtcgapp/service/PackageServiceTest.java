@@ -98,7 +98,7 @@ public class PackageServiceTest {
                 .name(createCardCommand4.name())
                 .damage(createCardCommand4.damage())
                 .damageType(DamageType.FIRE)
-                .criticalHitChance(0.2)
+                .criticalHitMultiplier(0.2)
                 .build();
 
         List<CreateCardCommand> commands = List.of(createCardCommand1, createCardCommand2, createCardCommand3, createCardCommand4);
