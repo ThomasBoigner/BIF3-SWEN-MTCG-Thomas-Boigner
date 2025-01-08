@@ -67,23 +67,28 @@ public class BattleServiceImpl implements BattleService {
     }
 
     public double battleRound(Card cardPlayer1, Card cardPlayer2) {
+        log.info("Player 1 fights with card {} and player 2 with card {}", cardPlayer1, cardPlayer2);
         double player1Damage = cardPlayer1.getDamage();
         double player2Damage = cardPlayer2.getDamage();
 
         if (cardPlayer1 instanceof MonsterCard) {
             player2Damage = player2Damage - ((MonsterCard) cardPlayer1).getDefence();
+            log.info("Player 1's card is a monster card that reduces the damage of player 2. Player 2's damage is now {}", player2Damage);
         }
 
         if (cardPlayer2 instanceof MonsterCard) {
             player1Damage = player1Damage - ((MonsterCard) cardPlayer2).getDefence();
+            log.info("Player 2's card is a monster card that reduces the damage of player 1. Player 1's damage is now {}", player1Damage);
         }
 
         if (cardPlayer1 instanceof SpellCard) {
             player1Damage = player1Damage * ((SpellCard) cardPlayer1).getCriticalHitMultiplier();
+            log.info("Player 1's card is a spell card that multiplied his damage. Player 1's damage is now {}", player1Damage);
         }
 
         if (cardPlayer2 instanceof SpellCard) {
             player2Damage = player2Damage * ((SpellCard) cardPlayer2).getCriticalHitMultiplier();
+            log.info("Player 2's card is a spell card that multiplied his damage. Player 2's damage is now {}", player2Damage);
         }
 
         if (cardPlayer1 instanceof SpellCard || cardPlayer2 instanceof SpellCard) {
@@ -91,12 +96,14 @@ public class BattleServiceImpl implements BattleService {
                 (cardPlayer1.getDamageType() == DamageType.FIRE && cardPlayer2.getDamageType() == DamageType.NORMAL) ||
                 (cardPlayer1.getDamageType() == DamageType.NORMAL && cardPlayer2.getDamageType() == DamageType.WATER)) {
                 player1Damage = player1Damage * 2;
+                log.info("Player 1 has an element advantage over Player 2 and doubles his damage. Player 1's damage is now {}", player1Damage);
             }
 
             if ((cardPlayer2.getDamageType() == DamageType.WATER && cardPlayer1.getDamageType() == DamageType.FIRE) ||
                 (cardPlayer2.getDamageType() == DamageType.FIRE && cardPlayer1.getDamageType() == DamageType.NORMAL) ||
                 (cardPlayer2.getDamageType() == DamageType.NORMAL && cardPlayer1.getDamageType() == DamageType.WATER)) {
                 player2Damage = player2Damage * 2;
+                log.info("Player 2 has an element advantage over Player 1 and doubles his damage. Player 2's damage is now {}", player2Damage);
             }
         }
 
@@ -106,6 +113,7 @@ public class BattleServiceImpl implements BattleService {
             (cardPlayer1.getName().contains("Spell") && cardPlayer2.getName().contains("Kraken")) ||
             (cardPlayer1.getName().equals("FireElves") && cardPlayer2.getName().contains("Dragon"))) {
             player1Damage = 0;
+            log.info("Player 1's card can not fight against player 2's card, therefore his damage is set to 0");
         }
 
         if ((cardPlayer2.getName().contains("Goblin") && cardPlayer1.getName().contains("Dragon")) ||
@@ -114,8 +122,11 @@ public class BattleServiceImpl implements BattleService {
             (cardPlayer2.getName().contains("Spell") && cardPlayer1.getName().contains("Kraken")) ||
             (cardPlayer2.getName().equals("FireElves") && cardPlayer1.getName().contains("Dragon"))) {
             player2Damage = 0;
+            log.info("Player 2's card can not fight against player 1's card, therefore his damage is set to 0");
         }
 
-        return player1Damage - player2Damage;
+        double result = player1Damage - player2Damage;
+        log.info("The result is {}", result);
+        return result;
     }
 }
