@@ -2,6 +2,7 @@ package at.fhtw.mtcgapp.service;
 
 import at.fhtw.mtcgapp.model.*;
 import at.fhtw.mtcgapp.persistence.repository.UserRepository;
+import at.fhtw.mtcgapp.service.exception.BattleValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +21,10 @@ public class BattleServiceImpl implements BattleService {
 
         User player1 = authenticationService.getCurrentlyLoggedInUser(authToken);
 
+        if (player1.getDeck().isEmpty()) {
+            throw BattleValidationException.deckNotConfigured();
+        }
+
         Optional<User> player2Optional = userRepository.getUserInQueue();
 
         if (player2Optional.isEmpty()) {
@@ -31,24 +36,29 @@ public class BattleServiceImpl implements BattleService {
         User player2 = player2Optional.get();
         player2.setInQueue(false);
 
+        log.info("Player1 {} will fight against player2 {} ", player1, player2);
         for (int i = 0;
              i < 100 && !player1.getDeck().isEmpty() && !player2.getDeck().isEmpty();
              i++) {
+            log.info("Round {}, player 1 has {} cards and player 2 has {} cards", i, player1.getDeck().size(), player2.getDeck().size());
             Card cardPlayer1 = player1.getDeck().get((int) (Math.random() * (player1.getDeck().size() - 1)));
             Card cardPlayer2 = player2.getDeck().get((int) (Math.random() * (player1.getDeck().size() - 1)));
 
             double result = battleRound(cardPlayer1, cardPlayer2);
 
             if (result > 0) {
+                log.info("Player 1 won the round");
                 player1.getDeck().add(cardPlayer2);
                 player2.getDeck().remove(cardPlayer2);
             } else {
+                log.info("Player 2 won the round");
                 player2.getDeck().add(cardPlayer1);
                 player1.getDeck().remove(cardPlayer1);
             }
         }
 
         if (player1.getDeck().isEmpty()) {
+            log.info("Player 2 won the battle");
             player2.setElo(player2.getElo() + 3);
             player2.setWins(player2.getWins() + 1);
             player1.setElo(player1.getElo() - 5);
@@ -56,6 +66,7 @@ public class BattleServiceImpl implements BattleService {
         }
 
         if (player2.getDeck().isEmpty()) {
+            log.info("Player 1 won the battle");
             player1.setElo(player1.getElo() + 3);
             player1.setWins(player1.getWins() + 1);
             player2.setElo(player2.getElo() - 5);

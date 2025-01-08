@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
                 .password(encoder.encodeToString(command.password().getBytes()))
                 .bio("")
                 .image("")
-                .elo(0)
+                .elo(100)
                 .wins(0)
                 .losses(0)
                 .coins(20)
