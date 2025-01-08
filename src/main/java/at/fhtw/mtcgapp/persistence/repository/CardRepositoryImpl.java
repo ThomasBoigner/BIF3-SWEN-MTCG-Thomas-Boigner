@@ -54,7 +54,7 @@ public class CardRepositoryImpl implements CardRepository {
             }
         } else if (card instanceof SpellCard) {
             try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                    INSERT INTO mtcg.spell_card (token, name, damage, damage_type, fk_user_id, fk_package_id, critical_hit_chance)
+                    INSERT INTO mtcg.spell_card (token, name, damage, damage_type, fk_user_id, fk_package_id, critical_hit_multiplier)
                     VALUES (?, ?, ?, ?::mtcg.damage_type, ?, ?, ?)
                     RETURNING id;
                     """)) {
@@ -111,7 +111,7 @@ public class CardRepositoryImpl implements CardRepository {
         } else if (card instanceof SpellCard) {
             try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                     UPDATE mtcg.spell_card
-                    SET token = ?, name = ?, damage = ?, damage_type = ?::mtcg.damage_type, fk_user_id = ?, fk_package_id = ?, critical_hit_chance = ?
+                    SET token = ?, name = ?, damage = ?, damage_type = ?::mtcg.damage_type, fk_user_id = ?, fk_package_id = ?, critical_hit_multiplier = ?
                     WHERE id = ?;
                     """)) {
                 preparedStatement.setObject(1, card.getToken());
@@ -168,7 +168,7 @@ public class CardRepositoryImpl implements CardRepository {
 
         List<SpellCard> spellCards = new ArrayList<>();
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_chance
+                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_multiplier
                 FROM mtcg.spell_card
                 WHERE fk_user_id = ? AND in_deck = false
                 """)) {
@@ -185,7 +185,7 @@ public class CardRepositoryImpl implements CardRepository {
                         .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
                         .user(null)
                         .cardPackage(null)
-                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_chance"))
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_multiplier"))
                         .build());
             }
         } catch (SQLException e) {
@@ -229,7 +229,7 @@ public class CardRepositoryImpl implements CardRepository {
 
         List<SpellCard> spellCards = new ArrayList<>();
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_chance
+                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_multiplier
                 FROM mtcg.spell_card
                 WHERE fk_user_id = ? AND in_deck = true
                 """)) {
@@ -246,7 +246,7 @@ public class CardRepositoryImpl implements CardRepository {
                         .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
                         .user(null)
                         .cardPackage(null)
-                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_chance"))
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_multiplier"))
                         .build());
             }
         } catch (SQLException e) {

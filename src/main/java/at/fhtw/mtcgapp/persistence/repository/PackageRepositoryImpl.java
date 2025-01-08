@@ -108,7 +108,7 @@ public class PackageRepositoryImpl implements PackageRepository {
 
         List<SpellCard> spellCards = new ArrayList<>();
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_chance
+                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_multiplier
                 FROM mtcg.spell_card
                 WHERE fk_package_id = ?
                 """)) {
@@ -125,7 +125,7 @@ public class PackageRepositoryImpl implements PackageRepository {
                         .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
                         .user(null)
                         .cardPackage(pkg)
-                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_chance"))
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_multiplier"))
                         .build());
             }
         } catch (SQLException e) {

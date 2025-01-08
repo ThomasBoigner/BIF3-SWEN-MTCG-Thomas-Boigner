@@ -24,7 +24,7 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> findByUsername(String username) {
         log.debug("Trying to find user with username: {}", username);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins, "user".in_queue
                 From mtcg.user
                 where username = ?
                 """)) {
@@ -44,6 +44,7 @@ public class UserRepositoryImpl implements UserRepository {
                         .wins(resultSet.getInt("wins"))
                         .losses(resultSet.getInt("losses"))
                         .coins(resultSet.getInt("coins"))
+                        .inQueue(resultSet.getBoolean("in_queue"))
                         .deck(new ArrayList<>())
                         .stack(new ArrayList<>())
                         .trades(new ArrayList<>())
@@ -61,8 +62,8 @@ public class UserRepositoryImpl implements UserRepository {
     public User save(User user) {
         log.debug("Trying to save user {}", user);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, wins, losses)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO mtcg.user (token, username, password, bio, image, coins, elo, wins, losses, in_queue)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id;
                 """)) {
             preparedStatement.setObject(1, user.getToken());
@@ -74,6 +75,7 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setInt(7, user.getElo());
             preparedStatement.setInt(8, user.getWins());
             preparedStatement.setInt(9, user.getLosses());
+            preparedStatement.setBoolean(10, user.isInQueue());
 
             ResultSet resultSet = preparedStatement.executeQuery();
             resultSet.next();
@@ -118,7 +120,7 @@ public class UserRepositoryImpl implements UserRepository {
         log.debug("Trying to update user {}", user);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 UPDATE mtcg.user
-                SET token = ?, username = ?, password = ?, bio = ?, image = ?, coins = ?, elo = ?, wins = ?, losses = ?
+                SET token = ?, username = ?, password = ?, bio = ?, image = ?, coins = ?, elo = ?, wins = ?, losses = ?, in_queue = ?
                 WHERE id = ?
                 """)) {
             preparedStatement.setObject(1, user.getToken());
@@ -130,7 +132,8 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setInt(7, user.getElo());
             preparedStatement.setInt(8, user.getWins());
             preparedStatement.setInt(9, user.getLosses());
-            preparedStatement.setLong(10, user.getId());
+            preparedStatement.setBoolean(10, user.isInQueue());
+            preparedStatement.setLong(11, user.getId());
 
             preparedStatement.executeUpdate();
             return user;
@@ -145,7 +148,7 @@ public class UserRepositoryImpl implements UserRepository {
     public List<User> findAllUsers() {
         log.debug("Trying to find all users");
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins, "user".in_queue
                 FROM mtcg.user
                 """)) {
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -164,6 +167,7 @@ public class UserRepositoryImpl implements UserRepository {
                         .wins(resultSet.getInt("wins"))
                         .losses(resultSet.getInt("losses"))
                         .coins(resultSet.getInt("coins"))
+                        .inQueue(resultSet.getBoolean("in_queue"))
                         .deck(new ArrayList<>())
                         .stack(new ArrayList<>())
                         .trades(new ArrayList<>())
