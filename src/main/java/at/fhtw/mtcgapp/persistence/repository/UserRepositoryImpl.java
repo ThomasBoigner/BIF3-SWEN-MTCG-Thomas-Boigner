@@ -177,4 +177,9 @@ public class UserRepositoryImpl implements UserRepository {
             throw new DataAccessException("Select failed!", e);
         }
     }
+
+    @Override
+    public Optional<User> getUserInQueue() {
+        return Optional.empty();
+    }
 }
