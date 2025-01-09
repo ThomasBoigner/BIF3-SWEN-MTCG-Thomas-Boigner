@@ -65,7 +65,7 @@ public class PackageServiceImpl implements PackageService {
                         .damage(command.damage())
                         .cardPackage(pkg)
                         .damageType(damageType)
-                        .criticalHitChance(0.2)
+                        .criticalHitMultiplier(1.2)
                         .build();
             } else {
                 return MonsterCard.builder()

@@ -22,6 +22,7 @@ public class User {
     private int elo;
     private int wins;
     private int losses;
+    private boolean inQueue;
 
     private List<Card> stack;
     private List<Card> deck;
@@ -39,6 +40,7 @@ public class User {
                ", username='" + username + '\'' +
                ", token=" + token +
                ", id=" + id +
+               ", inQueue=" + inQueue +
                '}';
     }
 
@@ -46,11 +48,11 @@ public class User {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && coins == user.coins && elo == user.elo && wins == user.wins && losses == user.losses && Objects.equals(token, user.token) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(bio, user.bio) && Objects.equals(image, user.image);
+        return id == user.id && coins == user.coins && elo == user.elo && wins == user.wins && losses == user.losses && inQueue == user.inQueue && Objects.equals(token, user.token) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(bio, user.bio) && Objects.equals(image, user.image);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, token, username, password, bio, image, coins, elo, wins, losses);
+        return Objects.hash(id, token, username, password, bio, image, coins, elo, wins, losses, inQueue);
     }
 }

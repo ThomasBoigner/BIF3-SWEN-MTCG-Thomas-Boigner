@@ -37,7 +37,8 @@ public class UserRepositoryTest {
 
     @BeforeEach
     void beforeEach() {
-        userRepository = new UserRepositoryImpl(new UnitOfWork());
+        UnitOfWork unitOfWork = new UnitOfWork();
+        userRepository = new UserRepositoryImpl(unitOfWork, new CardRepositoryImpl(unitOfWork));
     }
 
     @Test
@@ -239,5 +240,34 @@ public class UserRepositoryTest {
         assertThat(returned.size()).isEqualTo(2);
         assertThat(returned).contains(user1);
         assertThat(returned).contains(user2);
+    }
+
+    @Test
+    void ensureGetUserInQueueWorksProperly() {
+        // Given
+        User user1 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(100)
+                .wins(4)
+                .losses(3)
+                .inQueue(true)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        userRepository.save(user1);
+
+        // When
+        Optional<User> returned = userRepository.getUserInQueue();
+
+        // Then
+        assertThat(returned.isPresent()).isTrue();
+        assertThat(returned.get()).isEqualTo(user1);
     }
 }

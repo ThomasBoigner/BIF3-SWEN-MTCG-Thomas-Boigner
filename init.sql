@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS mtcg."user"
     elo integer,
     wins integer,
     losses integer,
+    in_queue boolean NOT NULL DEFAULT false,
     UNIQUE (token),
     UNIQUE (username)
 );
@@ -93,7 +94,7 @@ ALTER TABLE IF EXISTS mtcg.monster_card OWNER to mtcgdb;
 
 CREATE TABLE IF NOT EXISTS mtcg.spell_card
 (
-    critical_hit_chance double precision
+    critical_hit_multiplier double precision
 )
 INHERITS (mtcg.card);
 

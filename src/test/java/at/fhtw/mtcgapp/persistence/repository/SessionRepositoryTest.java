@@ -43,7 +43,7 @@ public class SessionRepositoryTest {
     @BeforeEach
     void setUp() {
         UnitOfWork unitOfWork = new UnitOfWork();
-        userRepository = new UserRepositoryImpl(unitOfWork);
+        userRepository = new UserRepositoryImpl(unitOfWork, new CardRepositoryImpl(unitOfWork));
         sessionRepository = new SessionRepositoryImpl(unitOfWork, new CardRepositoryImpl(unitOfWork));
     }
 

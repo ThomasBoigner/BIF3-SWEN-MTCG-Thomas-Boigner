@@ -51,6 +51,7 @@ public enum DatabaseManager {
                     elo integer,
                     wins integer,
                     losses integer,
+                    in_queue boolean NOT NULL DEFAULT false,
                     UNIQUE (token),
                     UNIQUE (username)
                 );
@@ -119,7 +120,7 @@ public enum DatabaseManager {
             connection.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS mtcg.spell_card
                 (
-                    critical_hit_chance double precision
+                    critical_hit_multiplier double precision
                 )
                 INHERITS (mtcg.card);
             """);
