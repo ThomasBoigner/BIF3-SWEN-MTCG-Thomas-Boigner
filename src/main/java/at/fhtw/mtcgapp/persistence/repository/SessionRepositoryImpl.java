@@ -1,5 +1,6 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
+import at.fhtw.mtcgapp.model.Card;
 import at.fhtw.mtcgapp.model.Session;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.DataAccessException;
@@ -11,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,32 +34,33 @@ public class SessionRepositoryImpl implements SessionRepository {
             preparedStatement.setString(1, token);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            User user = null;
-            while (resultSet.next()) {
-                user = User.builder()
-                        .id(resultSet.getLong("id"))
-                        .token(UUID.fromString(resultSet.getString("token")))
-                        .username(resultSet.getString("username"))
-                        .password(resultSet.getString("password"))
-                        .bio(resultSet.getString("bio"))
-                        .image(resultSet.getString("image"))
-                        .elo(resultSet.getInt("elo"))
-                        .wins(resultSet.getInt("wins"))
-                        .losses(resultSet.getInt("losses"))
-                        .coins(resultSet.getInt("coins"))
-                        .inQueue(resultSet.getBoolean("in_queue"))
-                        .deck(new ArrayList<>())
-                        .stack(new ArrayList<>())
-                        .trades(new ArrayList<>())
-                        .build();
+            if (!resultSet.next()) {
+                return Optional.empty();
             }
 
-            if (user != null) {
-                user.setStack(cardRepository.getCardsOfUser(user.getId()));
-                user.setDeck(cardRepository.getCardsInDeckOfUser(user.getId()));
-            }
+            User user = User.builder()
+                    .id(resultSet.getLong("id"))
+                    .token(UUID.fromString(resultSet.getString("token")))
+                    .username(resultSet.getString("username"))
+                    .password(resultSet.getString("password"))
+                    .bio(resultSet.getString("bio"))
+                    .image(resultSet.getString("image"))
+                    .elo(resultSet.getInt("elo"))
+                    .wins(resultSet.getInt("wins"))
+                    .losses(resultSet.getInt("losses"))
+                    .coins(resultSet.getInt("coins"))
+                    .inQueue(resultSet.getBoolean("in_queue"))
+                    .deck(new ArrayList<>())
+                    .stack(new ArrayList<>())
+                    .trades(new ArrayList<>())
+                    .build();
 
-            return Optional.ofNullable(user);
+            user.setStack(cardRepository.getCardsOfUser(user.getId()));
+            user.getStack().forEach(card -> card.setUser(user));
+            user.setDeck(cardRepository.getCardsInDeckOfUser(user.getId()));
+            user.getDeck().forEach(card -> card.setUser(user));
+
+            return Optional.of(user);
         } catch (SQLException e) {
             log.error("Could not find user of session due to a sql exception");
             throw new DataAccessException("Select failed!", e);

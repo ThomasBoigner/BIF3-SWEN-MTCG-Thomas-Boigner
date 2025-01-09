@@ -19,6 +19,7 @@ import java.util.UUID;
 @Slf4j
 public class UserRepositoryImpl implements UserRepository {
     private final UnitOfWork unitOfWork;
+    private final CardRepository cardRepository;
 
     @Override
     public Optional<User> findByUsername(String username) {
@@ -31,27 +32,28 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setString(1, username);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            User user = null;
-            while (resultSet.next()) {
-                user = User.builder()
-                        .id(resultSet.getLong("id"))
-                        .token(UUID.fromString(resultSet.getString("token")))
-                        .username(resultSet.getString("username"))
-                        .password(resultSet.getString("password"))
-                        .bio(resultSet.getString("bio"))
-                        .image(resultSet.getString("image"))
-                        .elo(resultSet.getInt("elo"))
-                        .wins(resultSet.getInt("wins"))
-                        .losses(resultSet.getInt("losses"))
-                        .coins(resultSet.getInt("coins"))
-                        .inQueue(resultSet.getBoolean("in_queue"))
-                        .deck(new ArrayList<>())
-                        .stack(new ArrayList<>())
-                        .trades(new ArrayList<>())
-                        .build();
+            if (!resultSet.next()) {
+                return Optional.empty();
             }
 
-            return Optional.ofNullable(user);
+            User user = User.builder()
+                    .id(resultSet.getLong("id"))
+                    .token(UUID.fromString(resultSet.getString("token")))
+                    .username(resultSet.getString("username"))
+                    .password(resultSet.getString("password"))
+                    .bio(resultSet.getString("bio"))
+                    .image(resultSet.getString("image"))
+                    .elo(resultSet.getInt("elo"))
+                    .wins(resultSet.getInt("wins"))
+                    .losses(resultSet.getInt("losses"))
+                    .coins(resultSet.getInt("coins"))
+                    .inQueue(resultSet.getBoolean("in_queue"))
+                    .deck(new ArrayList<>())
+                    .stack(new ArrayList<>())
+                    .trades(new ArrayList<>())
+                    .build();
+
+            return Optional.of(user);
         } catch (SQLException e) {
             log.error("Could not find user due to a sql exception");
             throw new DataAccessException("Select failed!", e);
@@ -136,6 +138,9 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setLong(11, user.getId());
 
             preparedStatement.executeUpdate();
+
+            unitOfWork.commitTransaction();
+
             return user;
         } catch (SQLException e) {
             unitOfWork.rollbackTransaction();
@@ -150,6 +155,7 @@ public class UserRepositoryImpl implements UserRepository {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins, "user".in_queue
                 FROM mtcg.user
+                ORDER BY "user".elo DESC
                 """)) {
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -184,6 +190,44 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> getUserInQueue() {
-        return Optional.empty();
+        log.debug("Trying to find user that is in queue");
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins, "user".in_queue
+                From mtcg.user
+                where "user".in_queue = true
+                """)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            User user = User.builder()
+                    .id(resultSet.getLong("id"))
+                    .token(UUID.fromString(resultSet.getString("token")))
+                    .username(resultSet.getString("username"))
+                    .password(resultSet.getString("password"))
+                    .bio(resultSet.getString("bio"))
+                    .image(resultSet.getString("image"))
+                    .elo(resultSet.getInt("elo"))
+                    .wins(resultSet.getInt("wins"))
+                    .losses(resultSet.getInt("losses"))
+                    .coins(resultSet.getInt("coins"))
+                    .inQueue(resultSet.getBoolean("in_queue"))
+                    .deck(new ArrayList<>())
+                    .stack(new ArrayList<>())
+                    .trades(new ArrayList<>())
+                    .build();
+
+            user.setStack(cardRepository.getCardsOfUser(user.getId()));
+            user.getStack().forEach(card -> card.setUser(user));
+            user.setDeck(cardRepository.getCardsInDeckOfUser(user.getId()));
+            user.getDeck().forEach(card -> card.setUser(user));
+
+            return Optional.of(user);
+        } catch (SQLException e) {
+            log.error("Could not find user due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
     }
 }

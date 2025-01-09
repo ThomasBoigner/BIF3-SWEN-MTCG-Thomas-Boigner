@@ -32,8 +32,8 @@ public class Main {
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Base64.Encoder encoder = Base64.getEncoder();
 
-        UserRepository userRepository = new UserRepositoryImpl(unitOfWork);
         CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
+        UserRepository userRepository = new UserRepositoryImpl(unitOfWork, cardRepository);
         SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork, cardRepository);
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
 

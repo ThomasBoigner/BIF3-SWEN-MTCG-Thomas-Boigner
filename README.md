@@ -45,7 +45,6 @@ The project model represents the various components and their relationships with
 
 ## Todo
 - Check if name is used when updating username
-- Sort scoreboard by elo
 - init.sql refactor
 - bearer token refactor
 - singleton refactor

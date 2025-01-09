@@ -22,43 +22,53 @@ public class BattleServiceImpl implements BattleService {
         User player1 = authenticationService.getCurrentlyLoggedInUser(authToken);
 
         if (player1.getDeck().isEmpty()) {
+            log.warn("User {} has no deck configured", player1.getUsername());
             throw BattleValidationException.deckNotConfigured();
         }
 
         Optional<User> player2Optional = userRepository.getUserInQueue();
 
         if (player2Optional.isEmpty()) {
+            log.debug("No other player is in the queue, adding player to queue");
             player1.setInQueue(true);
             userRepository.updateUser(player1);
             return;
         }
 
         User player2 = player2Optional.get();
+
+        if (player1.equals(player2)) {
+            log.warn("User {} is the same as the one in queue", player1.getUsername());
+            throw BattleValidationException.sameUser();
+        }
+
         player2.setInQueue(false);
 
-        log.info("Player1 {} will fight against player2 {} ", player1, player2);
+        log.info("{} will fight against {} ", player1.getUsername(), player2.getUsername());
         for (int i = 0;
              i < 100 && !player1.getDeck().isEmpty() && !player2.getDeck().isEmpty();
              i++) {
-            log.info("Round {}, player 1 has {} cards and player 2 has {} cards", i, player1.getDeck().size(), player2.getDeck().size());
+            log.info("Round {}, {} has {} cards and {} has {} cards", i, player1.getUsername(), player1.getDeck().size(), player2.getUsername(), player2.getDeck().size());
             Card cardPlayer1 = player1.getDeck().get((int) (Math.random() * (player1.getDeck().size() - 1)));
-            Card cardPlayer2 = player2.getDeck().get((int) (Math.random() * (player1.getDeck().size() - 1)));
+            Card cardPlayer2 = player2.getDeck().get((int) (Math.random() * (player2.getDeck().size() - 1)));
 
             double result = battleRound(cardPlayer1, cardPlayer2);
 
             if (result > 0) {
-                log.info("Player 1 won the round");
+                log.info("{} won the round", player1.getUsername());
                 player1.getDeck().add(cardPlayer2);
                 player2.getDeck().remove(cardPlayer2);
-            } else {
-                log.info("Player 2 won the round");
+            } if(result < 0) {
+                log.info("{} won the round", player2.getUsername());
                 player2.getDeck().add(cardPlayer1);
                 player1.getDeck().remove(cardPlayer1);
+            } else {
+                log.info("Round ended in a draw");
             }
         }
 
         if (player1.getDeck().isEmpty()) {
-            log.info("Player 2 won the battle");
+            log.info("{} won the battle", player2.getUsername());
             player2.setElo(player2.getElo() + 3);
             player2.setWins(player2.getWins() + 1);
             player1.setElo(player1.getElo() - 5);
@@ -66,7 +76,7 @@ public class BattleServiceImpl implements BattleService {
         }
 
         if (player2.getDeck().isEmpty()) {
-            log.info("Player 1 won the battle");
+            log.info("{} won the battle", player1.getUsername());
             player1.setElo(player1.getElo() + 3);
             player1.setWins(player1.getWins() + 1);
             player2.setElo(player2.getElo() - 5);
@@ -78,28 +88,31 @@ public class BattleServiceImpl implements BattleService {
     }
 
     public double battleRound(Card cardPlayer1, Card cardPlayer2) {
-        log.info("Player 1 fights with card {} and player 2 with card {}", cardPlayer1, cardPlayer2);
+        String player1Username = cardPlayer1.getUser().getUsername();
+        String player2Username = cardPlayer2.getUser().getUsername();
+
+        log.info("{} fights with card {} and {} with card {}", player1Username, cardPlayer1, player2Username, cardPlayer2);
         double player1Damage = cardPlayer1.getDamage();
         double player2Damage = cardPlayer2.getDamage();
 
         if (cardPlayer1 instanceof MonsterCard) {
             player2Damage = player2Damage - ((MonsterCard) cardPlayer1).getDefence();
-            log.info("Player 1's card is a monster card that reduces the damage of player 2. Player 2's damage is now {}", player2Damage);
+            log.info("{} card is a monster card that reduces the damage of {}. {}'s damage is now {}", player1Username, player2Username, player2Username, player2Damage);
         }
 
         if (cardPlayer2 instanceof MonsterCard) {
             player1Damage = player1Damage - ((MonsterCard) cardPlayer2).getDefence();
-            log.info("Player 2's card is a monster card that reduces the damage of player 1. Player 1's damage is now {}", player1Damage);
+            log.info("{} card is a monster card that reduces the damage of {}. {}'s damage is now {}", player2Username, player1Username, player1Username, player1Damage);
         }
 
         if (cardPlayer1 instanceof SpellCard) {
             player1Damage = player1Damage * ((SpellCard) cardPlayer1).getCriticalHitMultiplier();
-            log.info("Player 1's card is a spell card that multiplied his damage. Player 1's damage is now {}", player1Damage);
+            log.info("{}'s card is a spell card that multiplied his damage. {}'s damage is now {}", player1Username, player1Username, player1Damage);
         }
 
         if (cardPlayer2 instanceof SpellCard) {
             player2Damage = player2Damage * ((SpellCard) cardPlayer2).getCriticalHitMultiplier();
-            log.info("Player 2's card is a spell card that multiplied his damage. Player 2's damage is now {}", player2Damage);
+            log.info("{}'s card is a spell card that multiplied his damage. {}'s damage is now {}", player2Username, player2Username, player2Damage);
         }
 
         if (cardPlayer1 instanceof SpellCard || cardPlayer2 instanceof SpellCard) {
@@ -107,14 +120,14 @@ public class BattleServiceImpl implements BattleService {
                 (cardPlayer1.getDamageType() == DamageType.FIRE && cardPlayer2.getDamageType() == DamageType.NORMAL) ||
                 (cardPlayer1.getDamageType() == DamageType.NORMAL && cardPlayer2.getDamageType() == DamageType.WATER)) {
                 player1Damage = player1Damage * 2;
-                log.info("Player 1 has an element advantage over Player 2 and doubles his damage. Player 1's damage is now {}", player1Damage);
+                log.info("{} has an element advantage over {} and doubles his damage. {}'s damage is now {}", player1Username, player2Username, player1Username, player1Damage);
             }
 
             if ((cardPlayer2.getDamageType() == DamageType.WATER && cardPlayer1.getDamageType() == DamageType.FIRE) ||
                 (cardPlayer2.getDamageType() == DamageType.FIRE && cardPlayer1.getDamageType() == DamageType.NORMAL) ||
                 (cardPlayer2.getDamageType() == DamageType.NORMAL && cardPlayer1.getDamageType() == DamageType.WATER)) {
                 player2Damage = player2Damage * 2;
-                log.info("Player 2 has an element advantage over Player 1 and doubles his damage. Player 2's damage is now {}", player2Damage);
+                log.info("{} has an element advantage over {} and doubles his damage. {}'s damage is now {}", player2Username, player1Username, player2Username, player2Damage);
             }
         }
 
@@ -124,7 +137,7 @@ public class BattleServiceImpl implements BattleService {
             (cardPlayer1.getName().contains("Spell") && cardPlayer2.getName().contains("Kraken")) ||
             (cardPlayer1.getName().equals("FireElves") && cardPlayer2.getName().contains("Dragon"))) {
             player1Damage = 0;
-            log.info("Player 1's card can not fight against player 2's card, therefore his damage is set to 0");
+            log.info("{}'s card can not fight against {}'s card, therefore his damage is set to 0", player1Username, player2Username);
         }
 
         if ((cardPlayer2.getName().contains("Goblin") && cardPlayer1.getName().contains("Dragon")) ||
@@ -133,7 +146,7 @@ public class BattleServiceImpl implements BattleService {
             (cardPlayer2.getName().contains("Spell") && cardPlayer1.getName().contains("Kraken")) ||
             (cardPlayer2.getName().equals("FireElves") && cardPlayer1.getName().contains("Dragon"))) {
             player2Damage = 0;
-            log.info("Player 2's card can not fight against player 1's card, therefore his damage is set to 0");
+            log.info("{}'s card can not fight against {}'s card, therefore his damage is set to 0", player2Username, player1Username);
         }
 
         double result = player1Damage - player2Damage;
