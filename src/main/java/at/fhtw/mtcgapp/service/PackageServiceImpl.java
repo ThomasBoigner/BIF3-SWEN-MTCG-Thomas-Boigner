@@ -33,6 +33,8 @@ public class PackageServiceImpl implements PackageService {
     public PackageDto createPackage(String authToken, List<CreateCardCommand> commands) {
         log.debug("Trying to create user with commands {}", commands);
 
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
         Set<ConstraintViolation<CreateCardCommand>> violations = commands.stream()
                 .map(command -> validator.validate(command))
                 .flatMap(Collection::stream)
@@ -81,7 +83,7 @@ public class PackageServiceImpl implements PackageService {
         pkg.setCards(cards);
         log.trace("Mapped commands {} to package object {}", commands, pkg);
 
-        log.info("Created package {}", pkg);
+        log.info("User {} created package {}", user.getUsername(), pkg);
         return new PackageDto(packageRepository.save(pkg));
     }
 
