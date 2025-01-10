@@ -81,6 +81,9 @@ public class TradeServiceImpl implements TradeService {
             throw TradeValidationException.notYourTrade();
         }
 
+        trade.getCardToTrade().setUser(user);
+
+        cardRepository.updateCard(trade.getCardToTrade());
         tradeRepository.deleteTradeById(trade.getId());
     }
 }

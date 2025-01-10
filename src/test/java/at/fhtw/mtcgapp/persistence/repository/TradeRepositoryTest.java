@@ -13,10 +13,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static java.util.Map.entry;
@@ -134,5 +131,50 @@ public class TradeRepositoryTest {
         // Then
         assertThat(returned.getId()).isNotZero();
         assertThat(returned).isEqualTo(trade);
+    }
+
+    @Test
+    void ensureGetTradeByTokenWorksProperly() {
+        // Given
+        MonsterCard card = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+        cardRepository.save(card);
+
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        userRepository.save(user);
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(card)
+                .trader(user)
+                .build();
+        tradeRepository.save(trade);
+
+        // When
+        Optional<Trade> returned = tradeRepository.getTradeByToken(trade.getToken());
+
+        // Then
+        assertThat(returned.isPresent()).isTrue();
+        assertThat(returned.get()).isEqualTo(trade);
     }
 }

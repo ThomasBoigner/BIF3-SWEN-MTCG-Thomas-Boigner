@@ -24,15 +24,16 @@ public class TradeRepositoryImpl implements TradeRepository {
     public List<Trade> getTrades() {
         log.debug("Trying to get all trades");
 
-        List<Trade> trades = new ArrayList<>();
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 SELECT trade.id as trade_id, trade.token as trade_token, trade.minimum_damage as trade_minimum_damage, trade.type as trade_type, monster_card.id as monster_card_id, monster_card.token as monster_card_token, monster_card.name as monster_card_name, monster_card.damage as monster_card_damage, monster_card.damage_type as monster_card_damage_type, monster_card.defence as monster_card_defence, spell_card.id as spell_card_id, spell_card.token as spell_card_token, spell_card.name as spell_card_name, spell_card.damage as spell_card_damage, spell_card.damage_type as spell_card_damage_type, spell_card.critical_hit_multiplier as spell_card_critical_hit_multiplier, "user".id as user_id, "user".token as user_token, "user".username as user_username, "user".password as user_password, "user".bio as user_bio, "user".image as user_image, "user".coins as user_coins, "user".elo as user_elo, "user".wins as user_wins, "user".losses as user_losses, "user".in_queue as user_in_queue
                 FROM mtcg.trade
-                left join mtcg.monster_card on monster_card.id = trade.fk_monster_card_id
-                left join mtcg.spell_card on spell_card.id = trade.fk_spell_card_id
-                inner join mtcg.user on "user".id = trade.fk_user_id""")) {
+                LEFT JOIN mtcg.monster_card on monster_card.id = trade.fk_monster_card_id
+                LEFT JOIN mtcg.spell_card on spell_card.id = trade.fk_spell_card_id
+                INNER JOIN mtcg.user on "user".id = trade.fk_user_id
+                """)) {
             ResultSet resultSet = preparedStatement.executeQuery();
 
+            List<Trade> trades = new ArrayList<>();
             while (resultSet.next()) {
                 Card cardToTrade = null;
                 if (resultSet.getObject("monster_card_id") != null) {
@@ -76,11 +77,11 @@ public class TradeRepositoryImpl implements TradeRepository {
                         .cardToTrade(cardToTrade)
                         .build());
             }
+            return trades;
         } catch (SQLException e) {
             log.error("Could not get trade due to a sql exception");
             throw new DataAccessException("Select failed!", e);
         }
-        return trades;
     }
 
     @Override
@@ -114,7 +115,71 @@ public class TradeRepositoryImpl implements TradeRepository {
 
     @Override
     public Optional<Trade> getTradeByToken(UUID token) {
-        return Optional.empty();
+        log.debug("Trying to get trade with token {}", token);
+
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT trade.id as trade_id, trade.token as trade_token, trade.minimum_damage as trade_minimum_damage, trade.type as trade_type, monster_card.id as monster_card_id, monster_card.token as monster_card_token, monster_card.name as monster_card_name, monster_card.damage as monster_card_damage, monster_card.damage_type as monster_card_damage_type, monster_card.defence as monster_card_defence, spell_card.id as spell_card_id, spell_card.token as spell_card_token, spell_card.name as spell_card_name, spell_card.damage as spell_card_damage, spell_card.damage_type as spell_card_damage_type, spell_card.critical_hit_multiplier as spell_card_critical_hit_multiplier, "user".id as user_id, "user".token as user_token, "user".username as user_username, "user".password as user_password, "user".bio as user_bio, "user".image as user_image, "user".coins as user_coins, "user".elo as user_elo, "user".wins as user_wins, "user".losses as user_losses, "user".in_queue as user_in_queue
+                FROM mtcg.trade
+                LEFT JOIN mtcg.monster_card on monster_card.id = trade.fk_monster_card_id
+                LEFT JOIN mtcg.spell_card on spell_card.id = trade.fk_spell_card_id
+                INNER JOIN mtcg.user on "user".id = trade.fk_user_id
+                WHERE trade.token = ?
+                """)) {
+            preparedStatement.setObject(1, token);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            Card cardToTrade = null;
+            if (resultSet.getObject("monster_card_id") != null) {
+                cardToTrade = MonsterCard.builder()
+                        .id(resultSet.getLong("monster_card_id"))
+                        .token(UUID.fromString(resultSet.getString("monster_card_token")))
+                        .name(resultSet.getString("monster_card_name"))
+                        .damage(resultSet.getDouble("monster_card_damage"))
+                        .damageType(DamageType.forDBValue(resultSet.getString("monster_card_damage_type")))
+                        .defence(resultSet.getDouble("monster_card_defence"))
+                        .build();
+            }
+            if (resultSet.getObject("spell_card_id") != null) {
+                cardToTrade = SpellCard.builder()
+                        .id(resultSet.getLong("spell_card_id"))
+                        .token(UUID.fromString(resultSet.getString("spell_card_token")))
+                        .name(resultSet.getString("spell_card_name"))
+                        .damage(resultSet.getDouble("spell_card_damage"))
+                        .damageType(DamageType.forDBValue(resultSet.getString("spell_card_damage_type")))
+                        .criticalHitMultiplier(resultSet.getDouble("spell_card_critical_hit_multiplier"))
+                        .build();
+            }
+
+            Trade trade = Trade.builder()
+                    .id(resultSet.getLong("trade_id"))
+                    .token(UUID.fromString(resultSet.getString("trade_token")))
+                    .minimumDamage(resultSet.getDouble("trade_minimum_damage"))
+                    .type(CardType.forDBValue(resultSet.getString("trade_type")))
+                    .trader(User.builder()
+                            .id(resultSet.getLong("user_id"))
+                            .username(resultSet.getString("user_username"))
+                            .password(resultSet.getString("user_password"))
+                            .bio(resultSet.getString("user_bio"))
+                            .image(resultSet.getString("user_image"))
+                            .coins(resultSet.getInt("user_coins"))
+                            .elo(resultSet.getInt("user_elo"))
+                            .wins(resultSet.getInt("user_wins"))
+                            .losses(resultSet.getInt("user_losses"))
+                            .inQueue(resultSet.getBoolean("user_in_queue"))
+                            .build())
+                    .cardToTrade(cardToTrade)
+                    .build();
+
+            return Optional.of(trade);
+        } catch (SQLException e) {
+            log.error("Could not get trade due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
     }
 
     @Override
