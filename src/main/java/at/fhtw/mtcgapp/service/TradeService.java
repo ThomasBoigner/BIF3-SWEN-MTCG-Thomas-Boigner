@@ -9,5 +9,6 @@ import java.util.UUID;
 public interface TradeService {
     List<TradeDto> getTrades(String authToken);
     TradeDto createTrade(String authToken, CreateTradeCommand command);
+    void acceptTrade(String authToken, UUID tradeId, UUID cardID);
     void deleteTrade(String authToken, UUID tradeId);
 }

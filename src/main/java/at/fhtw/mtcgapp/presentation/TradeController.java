@@ -33,6 +33,9 @@ public class TradeController extends AbstractController {
         if (request.getMethod() == Method.POST && request.getPathname().equals("/tradings")) {
             return handleServiceErrors(request, this::createTrade);
         }
+        if (request.getMethod() == Method.POST && request.getPathname().contains("/tradings") && request.getPathParts().size() == 2) {
+            return handleServiceErrors(request, this::acceptTrade);
+        }
         if (request.getMethod() == Method.DELETE && request.getPathname().contains("/tradings") && request.getPathParts().size() == 2) {
             return handleServiceErrors(request, this::deleteTrade);
         }
@@ -85,6 +88,26 @@ public class TradeController extends AbstractController {
         }
 
         return new Response(HttpStatus.CREATED, ContentType.JSON, json);
+    }
+
+    private Response acceptTrade(Request request) {
+        log.debug("Incoming http POST request {}", request);
+        Objects.requireNonNull(request.getBody(), "Body must not be null!");
+
+        UUID cardId;
+        try {
+            cardId = objectMapper.readValue(request.getBody(), UUID.class);
+        } catch (JsonMappingException e) {
+            log.warn("Request body with wrong format was received {}!", request.getBody());
+            return new Response(HttpStatus.BAD_REQUEST);
+        } catch (JsonProcessingException e) {
+            log.warn("Could not deserialize the card id {}!", request.getBody());
+            return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        tradeService.acceptTrade(extractAuthToken(request.getHeaderMap()), UUID.fromString(request.getPathParts().get(1)), cardId);
+
+        return new Response(HttpStatus.CREATED);
     }
 
     private Response deleteTrade(Request request) {

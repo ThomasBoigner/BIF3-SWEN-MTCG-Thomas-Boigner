@@ -170,6 +170,31 @@ public class TradeControllerTest {
     }
 
     @Test
+    void ensureAcceptTradeWorksProperly() throws JsonProcessingException {
+        // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtgcToken");
+
+        UUID tradeId = UUID.randomUUID();
+        UUID cardId = UUID.randomUUID();
+
+        Request request = Request.builder()
+                .method(Method.POST)
+                .headerMap(headerMap)
+                .pathname(String.format("/tradings/%s", tradeId))
+                .pathParts(List.of("tradings", tradeId.toString()))
+                .body(objectMapper.writeValueAsString(cardId))
+                .build();
+
+        // When
+        Response response = tradeController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(201);
+        verify(tradeService).acceptTrade(eq("Thomas-mtgcToken"), eq(tradeId), eq(cardId));
+    }
+
+    @Test
     void ensureDeleteTradeWorksProperly() {
         // Given
         HeaderMap headerMap = new HeaderMap();

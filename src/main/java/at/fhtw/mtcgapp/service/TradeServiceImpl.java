@@ -70,6 +70,11 @@ public class TradeServiceImpl implements TradeService {
     }
 
     @Override
+    public void acceptTrade(String authToken, UUID tradeId, UUID cardID) {
+
+    }
+
+    @Override
     public void deleteTrade(String authToken, UUID tradeId) {
         log.debug("Trying to delete trade with token {}", tradeId);
 
@@ -79,6 +84,7 @@ public class TradeServiceImpl implements TradeService {
 
         log.trace("Comparing user {} with trade user {}", user, trade.getTrader());
         if (!user.equals(trade.getTrader())) {
+            log.warn("User {} tried to trade with himself", user.getUsername());
             throw TradeValidationException.notYourTrade();
         }
 
