@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -166,5 +167,29 @@ public class TradeControllerTest {
 
         // Then
         assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void ensureDeleteTradeWorksProperly() {
+        // Given
+        HeaderMap headerMap = new HeaderMap();
+        headerMap.ingest("Authorization:Bearer Thomas-mtgcToken");
+
+        UUID id = UUID.randomUUID();
+
+        Request request = Request.builder()
+                .method(Method.DELETE)
+                .headerMap(headerMap)
+                .pathname(String.format("/tradings/%s", id))
+                .pathParts(List.of("tradings", id.toString()))
+                .body(null)
+                .build();
+
+        // When
+        Response response = tradeController.handleRequest(request);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(200);
+        verify(tradeService).deleteTrade(eq("Thomas-mtgcToken"), eq(id));
     }
 }

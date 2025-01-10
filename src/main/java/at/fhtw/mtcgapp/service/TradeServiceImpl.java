@@ -68,4 +68,9 @@ public class TradeServiceImpl implements TradeService {
         log.info("User {} created trade {}", user.getUsername(), trade);
         return new TradeDto(tradeRepository.save(trade));
     }
+
+    @Override
+    public void deleteTrade(String authToken, UUID tradeId) {
+
+    }
 }

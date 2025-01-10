@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 
@@ -31,6 +32,9 @@ public class TradeController extends AbstractController {
         }
         if (request.getMethod() == Method.POST && request.getPathname().equals("/tradings")) {
             return handleServiceErrors(request, this::createTrade);
+        }
+        if (request.getMethod() == Method.DELETE && request.getPathname().contains("/tradings") && request.getPathParts().size() == 2) {
+            return handleServiceErrors(request, this::deleteTrade);
         }
         return new Response(
                 HttpStatus.BAD_REQUEST,
@@ -81,5 +85,13 @@ public class TradeController extends AbstractController {
         }
 
         return new Response(HttpStatus.CREATED, ContentType.JSON, json);
+    }
+
+    private Response deleteTrade(Request request) {
+        log.debug("Incoming http DELETE request {}", request);
+
+        tradeService.deleteTrade(extractAuthToken(request.getHeaderMap()), UUID.fromString(request.getPathParts().get(1)));
+
+        return new Response(HttpStatus.OK);
     }
 }
