@@ -218,6 +218,274 @@ public class TradeServiceTest {
     }
 
     @Test
+    void ensureAcceptTradeWorksProperly() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user1 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        User user2 = User.builder()
+                .id(1)
+                .token(UUID.randomUUID())
+                .username("User 2")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(MonsterCard.builder()
+                        .token(UUID.randomUUID())
+                        .name("Dragon")
+                        .damage(50)
+                        .damageType(DamageType.NORMAL)
+                        .defence(10)
+                        .build())
+                .trader(user1)
+                .build();
+
+        Card exchangeCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(55)
+                .damageType(DamageType.FIRE)
+                .criticalHitMultiplier(0.2)
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user2);
+        when(tradeRepository.getTradeByToken(eq(trade.getToken()))).thenReturn(Optional.of(trade));
+        when(cardRepository.getCardByToken(eq(exchangeCard.getToken()))).thenReturn(Optional.of(exchangeCard));
+
+        // When
+        tradeService.acceptTrade(authToken, trade.getToken(), exchangeCard.getToken());
+
+        // Then
+        assertThat(trade.getCardToTrade().getUser()).isEqualTo(user2);
+        assertThat(exchangeCard.getUser()).isEqualTo(trade.getTrader());
+        verify(tradeRepository).deleteTradeById(eq(trade.getId()));
+    }
+
+    @Test
+    void ensureAcceptTradeThrowsTradeValidationExceptionWhenTheDamageOfTheTradedCardIsTooLow() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user1 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        User user2 = User.builder()
+                .id(1)
+                .token(UUID.randomUUID())
+                .username("User 2")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(MonsterCard.builder()
+                        .token(UUID.randomUUID())
+                        .name("Dragon")
+                        .damage(50)
+                        .damageType(DamageType.NORMAL)
+                        .defence(10)
+                        .build())
+                .trader(user1)
+                .build();
+
+        Card exchangeCard = SpellCard.builder()
+                .token(UUID.randomUUID())
+                .name("FireSpell")
+                .damage(15)
+                .damageType(DamageType.FIRE)
+                .criticalHitMultiplier(0.2)
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user2);
+        when(tradeRepository.getTradeByToken(eq(trade.getToken()))).thenReturn(Optional.of(trade));
+        when(cardRepository.getCardByToken(eq(exchangeCard.getToken()))).thenReturn(Optional.of(exchangeCard));
+
+        // Then
+        assertThrows(TradeValidationException.class, () -> tradeService.acceptTrade(authToken, trade.getToken(), exchangeCard.getToken()));
+    }
+
+    @Test
+    void ensureAcceptTradeThrowsTradeValidationExceptionWhenExchangeCardCannotBeFound() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user1 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        User user2 = User.builder()
+                .id(1)
+                .token(UUID.randomUUID())
+                .username("User 2")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(MonsterCard.builder()
+                        .token(UUID.randomUUID())
+                        .name("Dragon")
+                        .damage(50)
+                        .damageType(DamageType.NORMAL)
+                        .defence(10)
+                        .build())
+                .trader(user1)
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user2);
+        when(tradeRepository.getTradeByToken(eq(trade.getToken()))).thenReturn(Optional.of(trade));
+        when(cardRepository.getCardByToken(any())).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(TradeValidationException.class, () -> tradeService.acceptTrade(authToken, trade.getToken(), UUID.randomUUID()));
+    }
+
+    @Test
+    void ensureAcceptTradeThrowsTradeValidationExceptionWhenUserTriesToTradeWithHimself() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user1 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(MonsterCard.builder()
+                        .token(UUID.randomUUID())
+                        .name("Dragon")
+                        .damage(50)
+                        .damageType(DamageType.NORMAL)
+                        .defence(10)
+                        .build())
+                .trader(user1)
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user1);
+        when(tradeRepository.getTradeByToken(eq(trade.getToken()))).thenReturn(Optional.of(trade));
+
+        // Then
+        assertThrows(TradeValidationException.class, () -> tradeService.acceptTrade(authToken, trade.getToken(), UUID.randomUUID()));
+    }
+
+    @Test
+    void ensureAcceptTradeThrowsTradeValidationExceptionWhenTradeCanNotBeFound() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(tradeRepository.getTradeByToken(any())).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(TradeValidationException.class, () -> tradeService.acceptTrade(authToken, UUID.randomUUID(), UUID.randomUUID()));
+    }
+
+    @Test
     void ensureDeleteTradeWorksProperly() {
         // Given
         String authToken = "Thomas-mtgcToken";

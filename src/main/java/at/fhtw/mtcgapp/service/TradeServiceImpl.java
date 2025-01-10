@@ -71,7 +71,33 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     public void acceptTrade(String authToken, UUID tradeId, UUID cardID) {
+        log.debug("Trying to accept trade with user with authentication token {}, trade with token {} and card with token {}", authToken, tradeId, cardID);
 
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        Trade trade = tradeRepository.getTradeByToken(tradeId).orElseThrow(() -> TradeValidationException.tradeNotFound(tradeId));
+
+        if (user.equals(trade.getTrader())) {
+            log.warn("User {} tried to trade with himself", user.getUsername());
+            throw TradeValidationException.yourTrade();
+        }
+
+        Card exchangeCard = cardRepository.getCardByToken(cardID).orElseThrow(TradeValidationException::cardCanNotBeFound);
+
+        if (exchangeCard.getDamage() < trade.getMinimumDamage()) {
+            log.warn("User {} tried to trade card with not enough damage", user.getUsername());
+            throw TradeValidationException.cardDamageIsTooLow();
+        }
+
+        exchangeCard.setUser(trade.getTrader());
+        trade.getCardToTrade().setUser(user);
+
+        cardRepository.updateCard(exchangeCard);
+        cardRepository.updateCard(trade.getCardToTrade());
+
+        tradeRepository.deleteTradeById(trade.getId());
+
+        log.info("Trade {} was accepted with card {}", trade, exchangeCard);
     }
 
     @Override
@@ -84,7 +110,7 @@ public class TradeServiceImpl implements TradeService {
 
         log.trace("Comparing user {} with trade user {}", user, trade.getTrader());
         if (!user.equals(trade.getTrader())) {
-            log.warn("User {} tried to trade with himself", user.getUsername());
+            log.warn("User {} tried to delete a trade he does not own!", user.getUsername());
             throw TradeValidationException.notYourTrade();
         }
 

@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -295,5 +296,10 @@ public class CardRepositoryImpl implements CardRepository {
                 throw new DataAccessException("Update failed!", e);
             }
         }
+    }
+
+    @Override
+    public Optional<Card> getCardByToken(UUID token) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
