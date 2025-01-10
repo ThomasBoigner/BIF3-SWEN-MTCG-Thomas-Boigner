@@ -77,6 +77,7 @@ public class TradeServiceImpl implements TradeService {
 
         Trade trade = tradeRepository.getTradeByToken(tradeId).orElseThrow(() -> TradeValidationException.tradeNotFound(tradeId));
 
+        log.trace("Comparing user {} with trade user {}", user, trade.getTrader());
         if (!user.equals(trade.getTrader())) {
             throw TradeValidationException.notYourTrade();
         }
@@ -85,5 +86,6 @@ public class TradeServiceImpl implements TradeService {
 
         cardRepository.updateCard(trade.getCardToTrade());
         tradeRepository.deleteTradeById(trade.getId());
+        log.info("Deleted trade {}", trade);
     }
 }

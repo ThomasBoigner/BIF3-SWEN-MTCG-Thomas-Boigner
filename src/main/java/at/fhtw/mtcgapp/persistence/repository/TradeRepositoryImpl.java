@@ -64,6 +64,7 @@ public class TradeRepositoryImpl implements TradeRepository {
                         .type(CardType.forDBValue(resultSet.getString("trade_type")))
                         .trader(User.builder()
                                 .id(resultSet.getLong("user_id"))
+                                .token(UUID.fromString(resultSet.getString("user_token")))
                                 .username(resultSet.getString("user_username"))
                                 .password(resultSet.getString("user_password"))
                                 .bio(resultSet.getString("user_bio"))
@@ -162,6 +163,7 @@ public class TradeRepositoryImpl implements TradeRepository {
                     .type(CardType.forDBValue(resultSet.getString("trade_type")))
                     .trader(User.builder()
                             .id(resultSet.getLong("user_id"))
+                            .token(UUID.fromString(resultSet.getString("user_token")))
                             .username(resultSet.getString("user_username"))
                             .password(resultSet.getString("user_password"))
                             .bio(resultSet.getString("user_bio"))
@@ -184,6 +186,19 @@ public class TradeRepositoryImpl implements TradeRepository {
 
     @Override
     public void deleteTradeById(long id) {
+        log.debug("Trying to delete trade with id {}", id);
 
+        try(PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                DELETE FROM mtcg.trade
+                WHERE trade.id = ?
+                """)) {
+            preparedStatement.setLong(1, id);
+
+            preparedStatement.executeUpdate();
+            unitOfWork.commitTransaction();
+        } catch (SQLException e) {
+            log.error("Could not delete trade due to a sql exception");
+            throw new DataAccessException("Delete failed!", e);
+        }
     }
 }
