@@ -36,6 +36,7 @@ public class Main {
         UserRepository userRepository = new UserRepositoryImpl(unitOfWork, cardRepository);
         SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork, cardRepository);
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
+        TradeRepository tradeRepository = new TradeRepositoryImpl(unitOfWork);
 
         AuthenticationService authenticationService = new AuthenticationServiceImpl(sessionRepository, userRepository, validator, encoder);
         PackageService packageService = new PackageServiceImpl(authenticationService, packageRepository, cardRepository, userRepository, validator);
@@ -52,6 +53,7 @@ public class Main {
         router.addService("/stats", new StatsController(statsService, objectMapper));
         router.addService("/scoreboard", new ScoreBoardController(statsService, objectMapper));
         router.addService("/battles", new BattleController(battleService));
+        router.addService("/tradings", new TradeController(new TradeServiceImpl(tradeRepository, authenticationService, cardRepository, validator), objectMapper));
 
         return router;
     }

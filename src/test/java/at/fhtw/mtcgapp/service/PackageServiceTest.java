@@ -48,6 +48,24 @@ public class PackageServiceTest {
     @Test
     void ensureCreatePackageWorksProperly() {
         // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
         CreateCardCommand createCardCommand1 = CreateCardCommand.builder()
                 .id(UUID.fromString("845f0dc7-37d0-426e-994e-43fc3ac83c08"))
                 .name("WaterGoblin")
@@ -103,9 +121,10 @@ public class PackageServiceTest {
 
         List<CreateCardCommand> commands = List.of(createCardCommand1, createCardCommand2, createCardCommand3, createCardCommand4);
         when(packageRepository.save(any(Package.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
 
         // When
-        PackageDto packageDto = packageService.createPackage("Thomas-mtgcToken", commands);
+        PackageDto packageDto = packageService.createPackage(authToken, commands);
 
         // Then
         assertThat(packageDto.id()).isNotNull();

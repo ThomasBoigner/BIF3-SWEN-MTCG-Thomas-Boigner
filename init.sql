@@ -87,6 +87,7 @@ ALTER TABLE IF EXISTS mtcg.card OWNER to mtcgdb;
 CREATE TABLE IF NOT EXISTS mtcg.monster_card
 (
     defence double precision
+    PRIMARY KEY (id)
 )
 INHERITS (mtcg.card);
 
@@ -95,6 +96,7 @@ ALTER TABLE IF EXISTS mtcg.monster_card OWNER to mtcgdb;
 CREATE TABLE IF NOT EXISTS mtcg.spell_card
 (
     critical_hit_multiplier double precision
+    PRIMARY KEY (id)
 )
 INHERITS (mtcg.card);
 
@@ -106,11 +108,16 @@ CREATE TABLE IF NOT EXISTS mtcg.trade
     token uuid NOT NULL,
     "minimumDamage" double precision NOT NULL,
     type mtcg.card_type NOT NULL,
-    fk_card_id bigint NOT NULL,
-    fk_user_id bigint NOT NULL,
+    fk_monster_card_id bigint,
+    fk_spell_card_id bigint,
+    fk_user_id bigint,
     UNIQUE (token),
-    CONSTRAINT fk_card_id FOREIGN KEY (fk_card_id)
-    REFERENCES mtcg.card (id) MATCH SIMPLE
+    CONSTRAINT fk_monster_card_id FOREIGN KEY (fk_monster_card_id)
+    REFERENCES mtcg.monster_card (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION,
+    CONSTRAINT fk_spell_card_id FOREIGN KEY (fk_spell_card_id)
+    REFERENCES mtcg.spell_card (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION,
     CONSTRAINT fk_user_id FOREIGN KEY (fk_user_id)
