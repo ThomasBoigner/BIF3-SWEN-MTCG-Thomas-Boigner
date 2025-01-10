@@ -71,6 +71,16 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     public void deleteTrade(String authToken, UUID tradeId) {
+        log.debug("Trying to delete trade with token {}", tradeId);
 
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
+
+        Trade trade = tradeRepository.getTradeByToken(tradeId).orElseThrow(() -> TradeValidationException.tradeNotFound(tradeId));
+
+        if (!user.equals(trade.getTrader())) {
+            throw TradeValidationException.notYourTrade();
+        }
+
+        tradeRepository.deleteTradeById(trade.getId());
     }
 }

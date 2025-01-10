@@ -16,12 +16,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -214,5 +215,122 @@ public class TradeServiceTest {
 
         // Then
         assertThrows(ConstraintViolationException.class, () -> tradeService.createTrade(authToken, command));
+    }
+
+    @Test
+    void ensureDeleteTradeWorksProperly() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(MonsterCard.builder()
+                        .token(UUID.randomUUID())
+                        .name("Dragon")
+                        .damage(50)
+                        .damageType(DamageType.NORMAL)
+                        .defence(10)
+                        .build())
+                .trader(user)
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(tradeRepository.getTradeByToken(eq(trade.getToken()))).thenReturn(Optional.of(trade));
+
+        // When
+        tradeService.deleteTrade(authToken, trade.getToken());
+
+        // Then
+        verify(tradeRepository).deleteTradeById(eq(trade.getId()));
+    }
+
+    @Test
+    void ensureDeleteTradeThrowsTradeValidationExceptionWhenTradeIsNotOwnedByUser() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(MonsterCard.builder()
+                        .token(UUID.randomUUID())
+                        .name("Dragon")
+                        .damage(50)
+                        .damageType(DamageType.NORMAL)
+                        .defence(10)
+                        .build())
+                .trader(User.builder()
+                        .username("Fake Thomas")
+                        .build())
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(tradeRepository.getTradeByToken(eq(trade.getToken()))).thenReturn(Optional.of(trade));
+
+        // Then
+        assertThrows(TradeValidationException.class, () -> tradeService.deleteTrade(authToken, trade.getToken()));
+    }
+
+    @Test
+    void ensureDeleteTradeThrowsTradeValidationExceptionWhenTradeCanNotBeFound() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(tradeRepository.getTradeByToken(any())).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(TradeValidationException.class, () -> tradeService.deleteTrade(authToken, UUID.randomUUID()));
     }
 }

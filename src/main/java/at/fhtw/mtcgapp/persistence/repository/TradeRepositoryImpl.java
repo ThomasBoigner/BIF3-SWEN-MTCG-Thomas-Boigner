@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -109,5 +110,15 @@ public class TradeRepositoryImpl implements TradeRepository {
             log.error("Could not create trade due to a sql exception");
             throw new DataAccessException("Insert into failed!", e);
         }
+    }
+
+    @Override
+    public Optional<Trade> getTradeByToken(UUID token) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void deleteTradeById(long id) {
+
     }
 }
