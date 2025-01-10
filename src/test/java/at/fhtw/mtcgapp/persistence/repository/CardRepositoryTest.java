@@ -13,10 +13,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static java.util.Map.entry;
@@ -304,5 +301,25 @@ public class CardRepositoryTest {
 
         // When
         cardRepository.configureDeckOfUser(List.of(monsterCard, spellCard));
+    }
+
+    @Test
+    void ensureGetCardByTokenWorksProperly(){
+        // Given
+        MonsterCard monsterCard = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+        cardRepository.save(monsterCard);
+
+        // When
+        Optional<Card> returned = cardRepository.getCardByToken(monsterCard.getToken());
+
+        // Then
+        assertThat(returned).isPresent();
+        assertThat(returned.get()).isEqualTo(monsterCard);
     }
 }
