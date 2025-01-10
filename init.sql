@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS mtcg.trade
 (
     id BIGSERIAL PRIMARY KEY,
     token uuid NOT NULL,
-    "minimumDamage" double precision NOT NULL,
+    minimum_damage double precision NOT NULL,
     type mtcg.card_type NOT NULL,
     fk_monster_card_id bigint,
     fk_spell_card_id bigint,

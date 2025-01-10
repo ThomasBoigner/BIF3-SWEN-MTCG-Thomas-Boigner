@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -44,6 +45,51 @@ public class TradeRepositoryTest {
         tradeRepository = new TradeRepositoryImpl(unitOfWork);
         cardRepository = new CardRepositoryImpl(unitOfWork);
         userRepository = new UserRepositoryImpl(unitOfWork, cardRepository);
+    }
+
+    @Test
+    void ensureGetTradesWorksProperly() {
+        // Given
+        MonsterCard card = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+        cardRepository.save(card);
+
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        userRepository.save(user);
+
+        Trade trade = Trade.builder()
+                .token(UUID.randomUUID())
+                .minimumDamage(50)
+                .type(CardType.SPELL)
+                .cardToTrade(card)
+                .trader(user)
+                .build();
+        tradeRepository.save(trade);
+
+        // When
+        List<Trade> returned = tradeRepository.getTrades();
+
+        // Then
+        assertThat(returned).hasSize(1);
+        assertThat(returned).contains(trade);
     }
 
     @Test
