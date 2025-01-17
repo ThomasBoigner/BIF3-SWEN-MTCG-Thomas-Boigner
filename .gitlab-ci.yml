@@ -6,8 +6,14 @@ stages:
   - lint
   - test
   - deploy
+variables:
+  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
 
 cache:
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .m2/repository/
 
@@ -32,3 +38,19 @@ test:
   script:
     - echo "Test App"
     - mvn test
+
+deploy:
+  stage: deploy
+  image: docker:25
+  services:
+    - name: docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker info
+    - apk add aws-cli
+  script:
+    - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 861896093479.dkr.ecr.us-east-1.amazonaws.com
+    - docker build -t team2/bif3-swen-mtcg-thomas-boigner -f src/main/docker/Dockerfile .
+    - docker tag team2/bif3-swen-mtcg-thomas-boigner:latest 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:latest
+    - docker push 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:latest
