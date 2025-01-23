@@ -51,7 +51,9 @@ public enum DatabaseManager {
                     image character varying(8) COLLATE pg_catalog."default",
                     coins integer,
                     elo integer,
-                    battles_fought integer,
+                    wins integer,
+                    losses integer,
+                    in_queue boolean NOT NULL DEFAULT false,
                     UNIQUE (token),
                     UNIQUE (username)
                 );
@@ -92,6 +94,7 @@ public enum DatabaseManager {
                     name character varying(32) COLLATE pg_catalog."default" NOT NULL,
                     damage double precision NOT NULL,
                     damage_type mtcg.damage_type NOT NULL,
+                    in_deck boolean NOT NULL DEFAULT false,
                     fk_user_id bigint,
                     fk_package_id bigint,
                     UNIQUE (token),
@@ -110,7 +113,8 @@ public enum DatabaseManager {
             connection.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS mtcg.monster_card
                 (
-                    defence double precision
+                    defence double precision,
+                    PRIMARY KEY (id)
                 )
                 INHERITS (mtcg.card);
             """);
@@ -119,7 +123,8 @@ public enum DatabaseManager {
             connection.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS mtcg.spell_card
                 (
-                    critical_hit_chance double precision
+                    critical_hit_multiplier double precision,
+                    PRIMARY KEY (id)
                 )
                 INHERITS (mtcg.card);
             """);
@@ -130,13 +135,18 @@ public enum DatabaseManager {
                 (
                     id BIGSERIAL PRIMARY KEY,
                     token uuid NOT NULL,
-                    "minimumDamage" double precision NOT NULL,
+                    minimum_damage double precision NOT NULL,
                     type mtcg.card_type NOT NULL,
-                    fk_card_id bigint NOT NULL,
-                    fk_user_id bigint NOT NULL,
+                    fk_monster_card_id bigint,
+                    fk_spell_card_id bigint,
+                    fk_user_id bigint,
                     UNIQUE (token),
-                    CONSTRAINT fk_card_id FOREIGN KEY (fk_card_id)
-                    REFERENCES mtcg.card (id) MATCH SIMPLE
+                    CONSTRAINT fk_monster_card_id FOREIGN KEY (fk_monster_card_id)
+                    REFERENCES mtcg.monster_card (id) MATCH SIMPLE
+                    ON UPDATE NO ACTION
+                    ON DELETE NO ACTION,
+                    CONSTRAINT fk_spell_card_id FOREIGN KEY (fk_spell_card_id)
+                    REFERENCES mtcg.spell_card (id) MATCH SIMPLE
                     ON UPDATE NO ACTION
                     ON DELETE NO ACTION,
                     CONSTRAINT fk_user_id FOREIGN KEY (fk_user_id)

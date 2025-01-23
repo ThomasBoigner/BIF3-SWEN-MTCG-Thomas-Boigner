@@ -7,6 +7,7 @@ import at.fhtw.httpserver.server.Request;
 import at.fhtw.httpserver.server.Response;
 import at.fhtw.httpserver.server.RestController;
 import at.fhtw.mtcgapp.service.exception.AuthenticationUnauthorizedException;
+import at.fhtw.mtcgapp.service.exception.ForbiddenException;
 import at.fhtw.mtcgapp.service.exception.UnauthorizedException;
 import at.fhtw.mtcgapp.service.exception.ValidationException;
 import jakarta.validation.ConstraintViolation;
@@ -28,15 +29,19 @@ public abstract class AbstractController implements RestController {
         }
         catch (ConstraintViolationException cExc) {
             log.trace("Handling constraint violation exception of type {}", cExc.getClass());
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, cExc.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", ")));
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.PLAIN_TEXT, cExc.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", ")));
         }
         catch (IllegalArgumentException | ValidationException | NullPointerException e) {
             log.trace("Handling validation exception of type {}", e.getClass());
-            return new Response(HttpStatus.BAD_REQUEST, ContentType.JSON, e.getMessage());
+            return new Response(HttpStatus.BAD_REQUEST, ContentType.PLAIN_TEXT, e.getMessage());
         }
         catch (UnauthorizedException e) {
             log.trace("Handling unauthorized exception of type {}", e.getClass());
-            return new Response(HttpStatus.UNAUTHORIZED, ContentType.JSON, e.getMessage());
+            return new Response(HttpStatus.UNAUTHORIZED, ContentType.PLAIN_TEXT, e.getMessage());
+        }
+        catch (ForbiddenException e) {
+            log.trace("Handling forbidden exception of type {}", e.getClass());
+            return new Response(HttpStatus.FORBIDDEN, ContentType.PLAIN_TEXT, e.getMessage());
         }
         catch (Exception e) {
             log.trace("Handling exception of type {}", e.getClass());

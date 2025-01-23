@@ -39,8 +39,10 @@ test:
     - echo "Test App"
     - mvn test
 
-deploy:
+deploy-master:
   stage: deploy
+  only:
+    - master
   image: docker:25
   services:
     - name: docker:dind
@@ -54,3 +56,21 @@ deploy:
     - docker build -t team2/bif3-swen-mtcg-thomas-boigner -f src/main/docker/Dockerfile .
     - docker tag team2/bif3-swen-mtcg-thomas-boigner:latest 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:latest
     - docker push 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:latest
+
+deploy-development:
+  stage: deploy
+  only:
+    - development
+  image: docker:25
+  services:
+    - name: docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker info
+    - apk add aws-cli
+  script:
+    - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 861896093479.dkr.ecr.us-east-1.amazonaws.com
+    - docker build -t team2/bif3-swen-mtcg-thomas-boigner -f src/main/docker/Dockerfile .
+    - docker tag team2/bif3-swen-mtcg-thomas-boigner:latest 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:development
+    - docker push 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:development

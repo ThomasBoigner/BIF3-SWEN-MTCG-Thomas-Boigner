@@ -43,8 +43,8 @@ public class SessionRepositoryTest {
     @BeforeEach
     void setUp() {
         UnitOfWork unitOfWork = new UnitOfWork();
-        userRepository = new UserRepositoryImpl(unitOfWork);
-        sessionRepository = new SessionRepositoryImpl(unitOfWork);
+        userRepository = new UserRepositoryImpl(unitOfWork, new CardRepositoryImpl(unitOfWork));
+        sessionRepository = new SessionRepositoryImpl(unitOfWork, new CardRepositoryImpl(unitOfWork));
     }
 
     @Test
@@ -57,7 +57,8 @@ public class SessionRepositoryTest {
                 .bio("")
                 .image("")
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .coins(20)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
@@ -99,7 +100,8 @@ public class SessionRepositoryTest {
                 .bio("")
                 .image("")
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .coins(20)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
@@ -131,7 +133,8 @@ public class SessionRepositoryTest {
                 .bio("")
                 .image("")
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .coins(20)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())
@@ -163,7 +166,8 @@ public class SessionRepositoryTest {
                 .bio("")
                 .image("")
                 .elo(0)
-                .battlesFought(0)
+                .wins(0)
+                .losses(0)
                 .coins(20)
                 .deck(new ArrayList<>())
                 .stack(new ArrayList<>())

@@ -24,6 +24,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final Validator validator;
     private final Base64.Encoder encoder;
 
+    @Override
     public User getCurrentlyLoggedInUser(String token) {
         log.debug("Trying to get the currently logged in user");
         User user = sessionRepository.findUserByToken(token).orElseThrow(AuthenticationUnauthorizedException::invalidToken);
@@ -31,6 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return user;
     }
 
+    @Override
     public String loginUser(LoginCommand command) {
         log.debug("Trying to authenticate user with command {}", command);
 

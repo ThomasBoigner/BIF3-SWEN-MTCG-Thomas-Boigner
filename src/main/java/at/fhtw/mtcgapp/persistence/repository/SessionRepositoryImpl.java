@@ -19,37 +19,46 @@ import java.util.UUID;
 @Slf4j
 public class SessionRepositoryImpl implements SessionRepository {
     private final UnitOfWork unitOfWork;
+    private final CardRepository cardRepository;
 
     @Override
     public Optional<User> findUserByToken(String token) {
         log.debug("Trying to find user with auth token {}", token);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".battles_fought, "user".coins
+                SELECT "user".id, "user".token, "user".username, "user".password, "user".bio, "user".image, "user".elo, "user".wins, "user".losses, "user".coins, "user".in_queue
                 FROM mtcg.session inner join mtcg.user on "session".fk_user_id = "user".id
                 WHERE session.token = ?
                 """)) {
             preparedStatement.setString(1, token);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            User user = null;
-            if (resultSet.next()) {
-                user = User.builder()
-                        .id(resultSet.getLong("id"))
-                        .token(UUID.fromString(resultSet.getString("token")))
-                        .username(resultSet.getString("username"))
-                        .password(resultSet.getString("password"))
-                        .bio(resultSet.getString("bio"))
-                        .image(resultSet.getString("image"))
-                        .elo(resultSet.getInt("elo"))
-                        .battlesFought(resultSet.getInt("battles_fought"))
-                        .coins(resultSet.getInt("coins"))
-                        .deck(new ArrayList<>())
-                        .stack(new ArrayList<>())
-                        .trades(new ArrayList<>())
-                        .build();
+            if (!resultSet.next()) {
+                return Optional.empty();
             }
 
-            return Optional.ofNullable(user);
+            User user = User.builder()
+                    .id(resultSet.getLong("id"))
+                    .token(UUID.fromString(resultSet.getString("token")))
+                    .username(resultSet.getString("username"))
+                    .password(resultSet.getString("password"))
+                    .bio(resultSet.getString("bio"))
+                    .image(resultSet.getString("image"))
+                    .elo(resultSet.getInt("elo"))
+                    .wins(resultSet.getInt("wins"))
+                    .losses(resultSet.getInt("losses"))
+                    .coins(resultSet.getInt("coins"))
+                    .inQueue(resultSet.getBoolean("in_queue"))
+                    .deck(new ArrayList<>())
+                    .stack(new ArrayList<>())
+                    .trades(new ArrayList<>())
+                    .build();
+
+            user.setStack(cardRepository.getCardsOfUser(user.getId()));
+            user.getStack().forEach(card -> card.setUser(user));
+            user.setDeck(cardRepository.getCardsInDeckOfUser(user.getId()));
+            user.getDeck().forEach(card -> card.setUser(user));
+
+            return Optional.of(user);
         } catch (SQLException e) {
             log.error("Could not find user of session due to a sql exception");
             throw new DataAccessException("Select failed!", e);

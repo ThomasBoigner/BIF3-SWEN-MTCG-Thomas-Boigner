@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -55,7 +56,7 @@ public class CardRepositoryImpl implements CardRepository {
             }
         } else if (card instanceof SpellCard) {
             try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                    INSERT INTO mtcg.spell_card (token, name, damage, damage_type, fk_user_id, fk_package_id, critical_hit_chance)
+                    INSERT INTO mtcg.spell_card (token, name, damage, damage_type, fk_user_id, fk_package_id, critical_hit_multiplier)
                     VALUES (?, ?, ?, ?::mtcg.damage_type, ?, ?, ?)
                     RETURNING id;
                     """)) {
@@ -65,7 +66,7 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setString(4, card.getDamageType().getDbValue());
                 preparedStatement.setObject(5, (card.getUser() != null) ? card.getUser().getId() : null);
                 preparedStatement.setObject(6, (card.getCardPackage() != null) ? card.getCardPackage().getId() : null);
-                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitChance());
+                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitMultiplier());
 
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if(resultSet.next()) {
@@ -113,7 +114,7 @@ public class CardRepositoryImpl implements CardRepository {
         } else if (card instanceof SpellCard) {
             try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                     UPDATE mtcg.spell_card
-                    SET token = ?, name = ?, damage = ?, damage_type = ?::mtcg.damage_type, fk_user_id = ?, fk_package_id = ?, critical_hit_chance = ?
+                    SET token = ?, name = ?, damage = ?, damage_type = ?::mtcg.damage_type, fk_user_id = ?, fk_package_id = ?, critical_hit_multiplier = ?
                     WHERE id = ?;
                     """)) {
                 preparedStatement.setObject(1, card.getToken());
@@ -122,7 +123,7 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setString(4, card.getDamageType().getDbValue());
                 preparedStatement.setObject(5, (card.getUser() != null) ? card.getUser().getId() : null);
                 preparedStatement.setObject(6, (card.getCardPackage() != null) ? card.getCardPackage().getId() : null);
-                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitChance());
+                preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitMultiplier());
                 preparedStatement.setLong(8, card.getId());
 
                 preparedStatement.executeUpdate();
@@ -145,7 +146,7 @@ public class CardRepositoryImpl implements CardRepository {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 SELECT monster_card.id, monster_card.token, monster_card.name, monster_card.damage, monster_card.damage_type, monster_card.fk_user_id, monster_card.fk_package_id, monster_card.defence
                 FROM mtcg.monster_card
-                WHERE fk_user_id = ?
+                WHERE fk_user_id = ? AND in_deck = false
                 """)) {
             preparedStatement.setLong(1, userId);
 
@@ -170,9 +171,9 @@ public class CardRepositoryImpl implements CardRepository {
 
         List<SpellCard> spellCards = new ArrayList<>();
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_chance
+                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_multiplier
                 FROM mtcg.spell_card
-                WHERE fk_user_id = ?
+                WHERE fk_user_id = ? AND in_deck = false
                 """)) {
             preparedStatement.setLong(1, userId);
 
@@ -187,7 +188,7 @@ public class CardRepositoryImpl implements CardRepository {
                         .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
                         .user(null)
                         .cardPackage(null)
-                        .criticalHitChance(resultSet.getDouble("critical_hit_chance"))
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_multiplier"))
                         .build());
             }
         } catch (SQLException e) {
@@ -195,6 +196,172 @@ public class CardRepositoryImpl implements CardRepository {
             throw new DataAccessException("Select failed!", e);
         }
 
-        return Stream.concat(monsterCards.stream(), spellCards.stream()).toList();
+        return new ArrayList<>(Stream.concat(monsterCards.stream(), spellCards.stream()).toList());
+    }
+
+    @Override
+    public List<Card> getCardsInDeckOfUser(long userId) {
+        log.debug("Trying to get cards in deck of user {}", userId);
+
+        List<MonsterCard> monsterCards = new ArrayList<>();
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT monster_card.id, monster_card.token, monster_card.name, monster_card.damage, monster_card.damage_type, monster_card.fk_user_id, monster_card.fk_package_id, monster_card.defence
+                FROM mtcg.monster_card
+                WHERE fk_user_id = ? AND in_deck = true
+                """)) {
+            preparedStatement.setLong(1, userId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                monsterCards.add(MonsterCard.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .name(resultSet.getString("name"))
+                        .damage(resultSet.getDouble("damage"))
+                        .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
+                        .user(null)
+                        .cardPackage(null)
+                        .defence(resultSet.getDouble("defence"))
+                        .build());
+            }
+        } catch (SQLException e) {
+            log.error("Could not get monster card due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
+
+        List<SpellCard> spellCards = new ArrayList<>();
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_multiplier
+                FROM mtcg.spell_card
+                WHERE fk_user_id = ? AND in_deck = true
+                """)) {
+            preparedStatement.setLong(1, userId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                spellCards.add(SpellCard.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .name(resultSet.getString("name"))
+                        .damage(resultSet.getDouble("damage"))
+                        .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
+                        .user(null)
+                        .cardPackage(null)
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_multiplier"))
+                        .build());
+            }
+        } catch (SQLException e) {
+            log.error("Could not get spell card due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
+
+        return new ArrayList<>(Stream.concat(monsterCards.stream(), spellCards.stream()).toList());
+    }
+
+    @Override
+    public void resetDeckOfUser(long userId) {
+        log.debug("Trying to reset deck of user {}", userId);
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                UPDATE mtcg.card
+                SET in_deck = false
+                WHERE fk_user_id = ?;
+                """)) {
+
+            preparedStatement.setLong(1, userId);
+
+            preparedStatement.executeUpdate();
+            unitOfWork.commitTransaction();
+        } catch (SQLException e) {
+            log.error("Could not remove card from deck due to a sql exception");
+            throw new DataAccessException("Update failed!", e);
+        }
+    }
+
+    @Override
+    public void configureDeckOfUser(List<Card> cards) {
+        log.debug("Trying to add cards {} to deck", cards);
+        for (Card card : cards) {
+            try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                    UPDATE mtcg.card
+                    SET in_deck = true
+                    WHERE id = ?;
+                    """)) {
+
+                preparedStatement.setLong(1, card.getId());
+
+                preparedStatement.executeUpdate();
+                unitOfWork.commitTransaction();
+            } catch (SQLException e) {
+                log.error("Could not add card to deck due to a sql exception");
+                throw new DataAccessException("Update failed!", e);
+            }
+        }
+    }
+
+    @Override
+    public Optional<Card> getCardByToken(UUID token) {
+        log.debug("Trying to get card with token {}", token);
+
+        MonsterCard monster_card = null;
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT monster_card.id, monster_card.token, monster_card.name, monster_card.damage, monster_card.damage_type, monster_card.defence
+                FROM mtcg.monster_card
+                WHERE token = ?
+                """)) {
+            preparedStatement.setObject(1, token);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                monster_card = MonsterCard.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .name(resultSet.getString("name"))
+                        .damage(resultSet.getDouble("damage"))
+                        .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
+                        .user(null)
+                        .cardPackage(null)
+                        .defence(resultSet.getDouble("defence"))
+                        .build();
+            }
+        } catch (SQLException e) {
+            log.error("Could not get monster card due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
+
+        if (monster_card != null) {
+            return Optional.of(monster_card);
+        }
+
+        SpellCard spell_card = null;
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT spell_card.id, spell_card.token, spell_card.name, spell_card.damage, spell_card.damage_type, spell_card.fk_user_id, spell_card.fk_package_id, spell_card.critical_hit_multiplier
+                FROM mtcg.spell_card
+                WHERE token = ?
+                """)) {
+            preparedStatement.setObject(1, token);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                spell_card = SpellCard.builder()
+                        .id(resultSet.getLong("id"))
+                        .token(UUID.fromString(resultSet.getString("token")))
+                        .name(resultSet.getString("name"))
+                        .damage(resultSet.getDouble("damage"))
+                        .damageType(DamageType.forDBValue(resultSet.getString("damage_type")))
+                        .user(null)
+                        .cardPackage(null)
+                        .criticalHitMultiplier(resultSet.getDouble("critical_hit_multiplier"))
+                        .build();
+            }
+        } catch (SQLException e) {
+            log.error("Could not get spell card due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
+
+        return Optional.ofNullable(spell_card);
     }
 }

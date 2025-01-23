@@ -36,19 +36,28 @@ public class Main {
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Base64.Encoder encoder = Base64.getEncoder();
 
-        UserRepository userRepository = new UserRepositoryImpl(unitOfWork);
-        SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork);
         CardRepository cardRepository = new CardRepositoryImpl(unitOfWork);
+        UserRepository userRepository = new UserRepositoryImpl(unitOfWork, cardRepository);
+        SessionRepository sessionRepository = new SessionRepositoryImpl(unitOfWork, cardRepository);
         PackageRepository packageRepository = new PackageRepositoryImpl(unitOfWork, cardRepository);
+        TradeRepository tradeRepository = new TradeRepositoryImpl(unitOfWork);
 
         AuthenticationService authenticationService = new AuthenticationServiceImpl(sessionRepository, userRepository, validator, encoder);
         PackageService packageService = new PackageServiceImpl(authenticationService, packageRepository, cardRepository, userRepository, validator);
+        CardService cardService = new CardServiceImpl(cardRepository, authenticationService);
+        StatsService statsService = new StatsServiceImpl(authenticationService, userRepository);
+        BattleService battleService = new BattleServiceImpl(authenticationService, userRepository);
 
-        router.addService("/users", new UserController(new UserServiceImpl(userRepository, validator, encoder), objectMapper));
+        router.addService("/users", new UserController(new UserServiceImpl(authenticationService, userRepository, validator, encoder), objectMapper));
         router.addService("/sessions", new AuthenticationController(authenticationService, objectMapper));
         router.addService("/packages", new PackageController(packageService, objectMapper));
         router.addService("/transactions", new TransactionsController(packageService));
-        router.addService("/cards", new CardController(new CardServiceImpl(cardRepository, authenticationService), objectMapper));
+        router.addService("/cards", new CardController(cardService, objectMapper));
+        router.addService("/deck", new DeckController(cardService, objectMapper));
+        router.addService("/stats", new StatsController(statsService, objectMapper));
+        router.addService("/scoreboard", new ScoreBoardController(statsService, objectMapper));
+        router.addService("/battles", new BattleController(battleService));
+        router.addService("/tradings", new TradeController(new TradeServiceImpl(tradeRepository, authenticationService, cardRepository, validator), objectMapper));
 
         return router;
     }

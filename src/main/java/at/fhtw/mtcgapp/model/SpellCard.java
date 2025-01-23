@@ -11,12 +11,12 @@ import java.util.Objects;
 @NoArgsConstructor
 @SuperBuilder
 public class SpellCard extends Card {
-    private double criticalHitChance;
+    private double criticalHitMultiplier;
 
     @Override
     public String toString() {
         return "SpellCard{" +
-               "criticalHitChance=" + criticalHitChance +
+               "criticalHitChance=" + criticalHitMultiplier +
                "} " + super.toString();
     }
 
@@ -25,11 +25,11 @@ public class SpellCard extends Card {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SpellCard spellCard = (SpellCard) o;
-        return Double.compare(criticalHitChance, spellCard.criticalHitChance) == 0;
+        return Double.compare(criticalHitMultiplier, spellCard.criticalHitMultiplier) == 0;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), criticalHitChance);
+        return Objects.hash(super.hashCode(), criticalHitMultiplier);
     }
 }

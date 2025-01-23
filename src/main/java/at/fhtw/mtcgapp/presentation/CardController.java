@@ -44,7 +44,7 @@ public class CardController extends AbstractController{
         try {
             json = objectMapper.writeValueAsString(cardDtos);
         } catch (JsonProcessingException e) {
-            log.error("Could not serialize the package dto!", e);
+            log.error("Could not serialize the card dtos!", e);
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
