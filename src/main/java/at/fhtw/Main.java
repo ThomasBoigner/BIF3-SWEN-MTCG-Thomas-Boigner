@@ -2,6 +2,7 @@ package at.fhtw;
 
 import at.fhtw.httpserver.server.Server;
 import at.fhtw.httpserver.utils.Router;
+import at.fhtw.mtcgapp.persistence.DatabaseManager;
 import at.fhtw.mtcgapp.persistence.UnitOfWork;
 import at.fhtw.mtcgapp.persistence.repository.*;
 import at.fhtw.mtcgapp.presentation.*;
@@ -17,6 +18,9 @@ import java.util.Base64;
 @Slf4j
 public class Main {
     public static void main(String[] args) {
+        if (args.length == 1) {
+            DatabaseManager.databaseUrl = args[0];
+        }
         Server server = new Server(10001, configureRouter());
         try {
             server.start();

@@ -1,6 +1,5 @@
 package at.fhtw.mtcgapp.persistence.repository;
 
-import at.fhtw.mtcgapp.model.Card;
 import at.fhtw.mtcgapp.model.Session;
 import at.fhtw.mtcgapp.model.User;
 import at.fhtw.mtcgapp.persistence.DataAccessException;
@@ -12,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -79,8 +77,9 @@ public class SessionRepositoryImpl implements SessionRepository {
             preparedStatement.setLong(2, session.getUser().getId());
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            session.setId(resultSet.getLong("id"));
+            if(resultSet.next()) {
+                session.setId(resultSet.getLong("id"));
+            }
 
             unitOfWork.commitTransaction();
             return session;
@@ -104,8 +103,10 @@ public class SessionRepositoryImpl implements SessionRepository {
             preparedStatement.setString(1, token);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            resultSet.next();
-            boolean exists = resultSet.getBoolean(1);
+            boolean exists = false;
+            if(resultSet.next()) {
+                exists = resultSet.getBoolean(1);
+            }
             log.debug(exists ? "Session with token {} does exist" : " Session with token {} does not exist", token);
             return exists;
         } catch (SQLException e) {

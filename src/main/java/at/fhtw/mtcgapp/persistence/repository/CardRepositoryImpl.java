@@ -42,8 +42,9 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setDouble(7, ((MonsterCard) card).getDefence());
 
                 ResultSet resultSet = preparedStatement.executeQuery();
-                resultSet.next();
-                card.setId(resultSet.getLong("id"));
+                if(resultSet.next()) {
+                    card.setId(resultSet.getLong("id"));
+                }
 
                 unitOfWork.commitTransaction();
 
@@ -68,8 +69,9 @@ public class CardRepositoryImpl implements CardRepository {
                 preparedStatement.setDouble(7, ((SpellCard) card).getCriticalHitMultiplier());
 
                 ResultSet resultSet = preparedStatement.executeQuery();
-                resultSet.next();
-                card.setId(resultSet.getLong("id"));
+                if(resultSet.next()) {
+                    card.setId(resultSet.getLong("id"));
+                }
 
                 unitOfWork.commitTransaction();
 

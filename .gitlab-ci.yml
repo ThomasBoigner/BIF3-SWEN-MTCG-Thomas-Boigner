@@ -1,0 +1,76 @@
+default:
+  image: maven:3.9.9-amazoncorretto-23-debian
+
+stages:
+  - build
+  - lint
+  - test
+  - deploy
+variables:
+  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2/repository/
+
+build:
+  stage: build
+  script:
+    - echo "Build App"
+    - mvn clean install -Dmaven.test.skip=true
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 day
+
+lint:
+  stage: lint
+  script:
+    - echo "Lint App"
+    - mvn pmd:check
+
+test:
+  stage: test
+  script:
+    - echo "Test App"
+    - mvn test
+
+deploy-master:
+  stage: deploy
+  only:
+    - master
+  image: docker:25
+  services:
+    - name: docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker info
+    - apk add aws-cli
+  script:
+    - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 861896093479.dkr.ecr.us-east-1.amazonaws.com
+    - docker build -t team2/bif3-swen-mtcg-thomas-boigner -f src/main/docker/Dockerfile .
+    - docker tag team2/bif3-swen-mtcg-thomas-boigner:latest 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:latest
+    - docker push 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:latest
+
+deploy-development:
+  stage: deploy
+  only:
+    - development
+  image: docker:25
+  services:
+    - name: docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker info
+    - apk add aws-cli
+  script:
+    - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 861896093479.dkr.ecr.us-east-1.amazonaws.com
+    - docker build -t team2/bif3-swen-mtcg-thomas-boigner -f src/main/docker/Dockerfile .
+    - docker tag team2/bif3-swen-mtcg-thomas-boigner:latest 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:development
+    - docker push 861896093479.dkr.ecr.us-east-1.amazonaws.com/team2/bif3-swen-mtcg-thomas-boigner:development

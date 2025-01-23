@@ -80,8 +80,9 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setBoolean(10, user.isInQueue());
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            user.setId(resultSet.getLong("id"));
+            if(resultSet.next()) {
+                user.setId(resultSet.getLong("id"));
+            }
 
             unitOfWork.commitTransaction();
 
@@ -106,8 +107,10 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setString(1, username);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            resultSet.next();
-            boolean exists = resultSet.getBoolean(1);
+            boolean exists = false;
+            if(resultSet.next()) {
+                exists = resultSet.getBoolean(1);
+            }
             log.debug(exists ? "User with username {} does exist" : " User with username {} does not exist", username);
             return exists;
 
@@ -138,7 +141,6 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setLong(11, user.getId());
 
             preparedStatement.executeUpdate();
-
             unitOfWork.commitTransaction();
 
             return user;

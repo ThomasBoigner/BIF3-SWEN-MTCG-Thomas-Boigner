@@ -102,8 +102,9 @@ public class TradeRepositoryImpl implements TradeRepository {
             preparedStatement.setObject(6, (trade.getTrader() != null) ? trade.getTrader().getId() : null);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            trade.setId(resultSet.getLong("id"));
+            if(resultSet.next()) {
+                trade.setId(resultSet.getLong("id"));
+            }
 
             unitOfWork.commitTransaction();
 
