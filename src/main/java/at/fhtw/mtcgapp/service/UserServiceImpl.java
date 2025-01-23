@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final Validator validator;
     private final Base64.Encoder encoder;
 
+    @Override
     public UserDataDto getUser(String authToken, String username) {
         log.debug("Trying to get user {} with auth token {}", username, authToken);
 
@@ -40,6 +41,7 @@ public class UserServiceImpl implements UserService {
         return new UserDataDto(user);
     }
 
+    @Override
     public UserDataDto createUser(CreateUserCommand command) {
         log.debug("Trying to create user with command {}", command);
 

@@ -20,6 +20,7 @@ public class CardServiceImpl implements CardService{
     private final CardRepository cardRepository;
     private final AuthenticationService authenticationService;
 
+    @Override
     public List<CardDto> getCardsOfUser(String authToken) {
         log.debug("Trying to get all cards of user with authToken {}", authToken);
 

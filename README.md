@@ -48,3 +48,4 @@ The project model represents the various components and their relationships with
 - init.sql refactor
 - bearer token refactor
 - singleton refactor
+- refactor getting currently logged in user to be called in controller

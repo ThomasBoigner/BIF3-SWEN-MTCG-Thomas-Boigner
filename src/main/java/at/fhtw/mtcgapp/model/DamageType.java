@@ -20,6 +20,6 @@ public enum DamageType {
         return Arrays.stream(values())
                 .filter(damageType -> damageType.getDbValue().equalsIgnoreCase(dbValue))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown shortcut for DamageType: %s", dbValue)));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown damage type: %s", dbValue)));
     }
 }

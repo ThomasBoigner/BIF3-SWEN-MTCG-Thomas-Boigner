@@ -30,8 +30,11 @@ public class PackageServiceImpl implements PackageService {
     private final UserRepository userRepository;
     private final Validator validator;
 
+    @Override
     public PackageDto createPackage(String authToken, List<CreateCardCommand> commands) {
-        log.debug("Trying to create user with commands {}", commands);
+        log.debug("Trying to create cards with commands {}", commands);
+
+        User user = authenticationService.getCurrentlyLoggedInUser(authToken);
 
         Set<ConstraintViolation<CreateCardCommand>> violations = commands.stream()
                 .map(command -> validator.validate(command))
@@ -39,7 +42,7 @@ public class PackageServiceImpl implements PackageService {
                 .collect(Collectors.toSet());
 
         if (!violations.isEmpty()) {
-            log.warn("Input validation for user failed!");
+            log.warn("Input validation for card failed!");
             throw new ConstraintViolationException(violations);
         }
 
@@ -81,10 +84,11 @@ public class PackageServiceImpl implements PackageService {
         pkg.setCards(cards);
         log.trace("Mapped commands {} to package object {}", commands, pkg);
 
-        log.info("Created package {}", pkg);
+        log.info("User {} created package {}", user.getUsername(), pkg);
         return new PackageDto(packageRepository.save(pkg));
     }
 
+    @Override
     public void acquirePackage(String authToken) {
         log.debug("Trying to acquire package with auth token {}", authToken);
 

@@ -15,6 +15,7 @@ public class Trade {
     private UUID token;
     private double minimumDamage;
 
+    private CardType type;
     private Card cardToTrade;
     private User trader;
 
