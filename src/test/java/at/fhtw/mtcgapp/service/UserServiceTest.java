@@ -166,6 +166,7 @@ public class UserServiceTest {
                 .trades(new ArrayList<>())
                 .build();
         when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(userRepository.existsByUsername(eq(userCommand.name()))).thenReturn(false);
 
         // When
         userService.updateUser(authToken, "Thomas", userCommand);
@@ -237,5 +238,76 @@ public class UserServiceTest {
 
         // When
         assertThrows(ForbiddenException.class, () -> userService.updateUser(authToken, "Momas", userCommand));
+    }
+
+    @Test
+    void ensureUpdateUserThrowsUserValidationExceptionWhenUsernameIsTaken() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        UpdateUserCommand userCommand = UpdateUserCommand.builder()
+                .name("Domas")
+                .bio("me codin...")
+                .image(":^)")
+                .build();
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(userRepository.existsByUsername(eq(userCommand.name()))).thenReturn(true);
+
+        // When
+        assertThrows(UserValidationException.class, () -> userService.updateUser(authToken, "Thomas", userCommand));
+    }
+
+    @Test
+    void ensureUpdateUserWorksProperlyWhenUpdatingToSameUsername(){
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        UpdateUserCommand userCommand = UpdateUserCommand.builder()
+                .name("Thomas")
+                .bio("me codin...")
+                .image(":^)")
+                .build();
+
+        User user = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(user);
+        when(userRepository.existsByUsername(eq(userCommand.name()))).thenReturn(true);
+
+        // When
+        userService.updateUser(authToken, "Thomas", userCommand);
+
+        // Then
+        assertThat(user.getUsername()).isEqualTo("Thomas");
+        assertThat(user.getBio()).isEqualTo("me codin...");
+        assertThat(user.getImage()).isEqualTo(":^)");
     }
 }

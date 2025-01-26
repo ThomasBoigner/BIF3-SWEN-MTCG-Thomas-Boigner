@@ -2,6 +2,9 @@
 ## Model:
 ![Model](/src/docs/model.png)
 
+## Changes to MonsterTradingCards.sh
+I removed the name change of user kienboec and altenhof, because in the following requests the name was not changed and that leads to errors.
+
 ## Project Structure
 
 ### Presentation Layer
@@ -44,7 +47,6 @@ The project model represents the various components and their relationships with
     - After processing the request, the service returns the response to the controller, which then sends it back to the user interface.
 
 ## Todo
-- Check if name is used when updating username
 - init.sql refactor
 - bearer token refactor
 - singleton refactor
