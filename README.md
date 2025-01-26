@@ -48,6 +48,6 @@ The project model represents the various components and their relationships with
 
 ## Todo
 - init.sql refactor
-- bearer token refactor
 - singleton refactor
+- bearer token refactor
 - refactor getting currently logged in user to be called in controller
