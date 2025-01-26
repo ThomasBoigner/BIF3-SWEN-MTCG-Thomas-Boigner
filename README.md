@@ -47,6 +47,5 @@ The project model represents the various components and their relationships with
     - After processing the request, the service returns the response to the controller, which then sends it back to the user interface.
 
 ## Todo
-- singleton refactor
 - bearer token refactor
 - refactor getting currently logged in user to be called in controller
