@@ -10,12 +10,10 @@ import java.sql.SQLException;
 public enum DatabaseManager {
     INSTANCE;
 
-    public static String databaseUrl = "jdbc:postgresql://localhost:5432/mtcgdb";
-
     public Connection getConnection() {
         try {
             Connection connection = DriverManager.getConnection(
-                    databaseUrl,
+                    "jdbc:postgresql://localhost:5432/mtcgdb",
                     "mtcgdb",
                     "mtcgdb");
             ScriptRunner scriptRunner = new ScriptRunner(connection);

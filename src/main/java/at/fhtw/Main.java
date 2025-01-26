@@ -18,9 +18,6 @@ import java.util.Base64;
 @Slf4j
 public class Main {
     public static void main(String[] args) {
-        if (args.length == 1) {
-            DatabaseManager.databaseUrl = args[0];
-        }
         Server server = new Server(10001, configureRouter());
         try {
             server.start();
