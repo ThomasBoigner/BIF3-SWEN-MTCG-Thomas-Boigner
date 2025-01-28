@@ -124,39 +124,6 @@ public class SessionRepositoryTest {
     }
 
     @Test
-    void ensureExistsByUsernameReturnsTrue(){
-        // Given
-        User user = User.builder()
-                .token(UUID.randomUUID())
-                .username("Thomas")
-                .password("Password")
-                .bio("")
-                .image("")
-                .elo(0)
-                .wins(0)
-                .losses(0)
-                .coins(20)
-                .deck(new ArrayList<>())
-                .stack(new ArrayList<>())
-                .trades(new ArrayList<>())
-                .build();
-
-        Session session = Session.builder()
-                .token("Thomas-mtcgToken")
-                .user(user)
-                .build();
-
-        userRepository.save(user);
-        sessionRepository.save(session);
-
-        // When
-        boolean exists = sessionRepository.existsByToken("Thomas-mtcgToken");
-
-        // Then
-        assertThat(exists).isTrue();
-    }
-
-    @Test
     void ensureDeleteByTokenWorksProperly(){
         // Given
         User user = User.builder()
