@@ -11,7 +11,7 @@ public enum CardServiceSingleton {
 
     private final CardService cardService;
 
-    private CardServiceSingleton(CardService cardService) {
+    CardServiceSingleton(CardService cardService) {
         this.cardService = cardService;
     }
 }

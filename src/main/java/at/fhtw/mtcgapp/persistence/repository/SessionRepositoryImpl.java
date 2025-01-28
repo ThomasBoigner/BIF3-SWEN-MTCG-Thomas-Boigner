@@ -67,7 +67,29 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public Optional<Session> findSessionByUserId(long id) {
-        return Optional.empty();
+        log.debug("Trying to find session of user with id {}", id);
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT session.id, session.token
+                FROM mtcg.session
+                WHERE session.fk_user_id = ?
+                """)) {
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            Session session = Session.builder()
+                    .id(resultSet.getLong("id"))
+                    .token(resultSet.getString("token"))
+                    .build();
+
+            return Optional.of(session);
+        } catch (SQLException e) {
+            log.error("Could not find session of user due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
     }
 
     @Override

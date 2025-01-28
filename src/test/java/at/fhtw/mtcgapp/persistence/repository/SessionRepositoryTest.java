@@ -91,6 +91,49 @@ public class SessionRepositoryTest {
     }
 
     @Test
+    void ensureFindSessionByUserIdWorksProperly(){
+        // Given
+        User user = User.builder()
+                .token(UUID.randomUUID())
+                .username("Thomas")
+                .password("Password")
+                .bio("")
+                .image("")
+                .elo(0)
+                .wins(0)
+                .losses(0)
+                .coins(20)
+                .deck(new ArrayList<>())
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+
+        Session session = Session.builder()
+                .token("Thomas-mtcgToken")
+                .user(user)
+                .build();
+
+        userRepository.save(user);
+        sessionRepository.save(session);
+
+        // When
+        Optional<Session> returned = sessionRepository.findSessionByUserId(user.getId());
+
+        // Then
+        assertThat(returned.isPresent()).isTrue();
+        assertThat(returned.get()).isEqualTo(session);
+    }
+
+    @Test
+    void ensureFindSessionByUserIdReturnsEmptyOptionalIfUserCanNotBeFound() {
+        // When
+        Optional<Session> returned = sessionRepository.findSessionByUserId(1);
+
+        // Then
+        assertThat(returned.isEmpty()).isTrue();
+    }
+
+    @Test
     void ensureSaveSessionWorksProperly(){
         // Given
         User user = User.builder()
