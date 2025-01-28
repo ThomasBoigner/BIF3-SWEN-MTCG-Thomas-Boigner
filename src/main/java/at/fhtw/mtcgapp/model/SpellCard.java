@@ -14,6 +14,24 @@ public class SpellCard extends Card {
     private double criticalHitMultiplier;
 
     @Override
+    public double calculateDamage(MonsterCard otherCard) {
+        double calculatedDamage = (this.damage - otherCard.getDefence()) * this.criticalHitMultiplier;
+        if (hasElementAdvantage(otherCard)) {
+            calculatedDamage *= 2;
+        }
+        return calculatedDamage;
+    }
+
+    @Override
+    public double calculateDamage(SpellCard otherCard) {
+        double calculatedDamage = this.damage * criticalHitMultiplier;
+        if (hasElementAdvantage(otherCard)) {
+            calculatedDamage *= 2;
+        }
+        return calculatedDamage;
+    }
+
+    @Override
     public String toString() {
         return "SpellCard{" +
                "criticalHitChance=" + criticalHitMultiplier +

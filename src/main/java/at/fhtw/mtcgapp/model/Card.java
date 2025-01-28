@@ -12,15 +12,34 @@ import java.util.UUID;
 @NoArgsConstructor
 @SuperBuilder
 public abstract class Card {
-    private long id;
-    private UUID token;
-    private String name;
-    private double damage;
+    protected long id;
+    protected UUID token;
+    protected String name;
+    protected double damage;
 
-    private User user;
-    private DamageType damageType;
-    private Trade trade;
-    private Package cardPackage;
+    protected User user;
+    protected DamageType damageType;
+    protected Trade trade;
+    protected Package cardPackage;
+
+    public double calculateDamage(Card cardOfOtherPlayer) {
+        if (cardOfOtherPlayer instanceof MonsterCard) {
+            return calculateDamage((MonsterCard) cardOfOtherPlayer);
+        }
+        if (cardOfOtherPlayer instanceof SpellCard) {
+            return calculateDamage((SpellCard) cardOfOtherPlayer);
+        }
+        return damage;
+    }
+
+    protected abstract double calculateDamage(MonsterCard otherCard);
+    protected abstract double calculateDamage(SpellCard otherCard);
+
+    protected boolean hasElementAdvantage(Card otherCard) {
+        return (this.getDamageType() == DamageType.WATER && otherCard.getDamageType() == DamageType.FIRE) ||
+            (this.getDamageType() == DamageType.FIRE && otherCard.getDamageType() == DamageType.NORMAL) ||
+            (this.getDamageType() == DamageType.NORMAL && otherCard.getDamageType() == DamageType.WATER);
+    }
 
     @Override
     public String toString() {
