@@ -4,8 +4,10 @@ import at.fhtw.mtcgapp.persistence.repository.UserRepositorySingleton;
 import at.fhtw.mtcgapp.util.Base64EncoderSingleton;
 import at.fhtw.mtcgapp.util.ValidatorSingleton;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum UserServiceSingleton {
     INSTANCE(new UserServiceImpl(
             AuthenticationServiceSingleton.INSTANCE.getAuthenticationService(),
@@ -14,8 +16,4 @@ public enum UserServiceSingleton {
             Base64EncoderSingleton.INSTANCE.getEncoder()));
 
     private final UserService userService;
-
-    UserServiceSingleton(UserService userService) {
-        this.userService = userService;
-    }
 }

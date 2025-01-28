@@ -5,8 +5,10 @@ import at.fhtw.mtcgapp.persistence.repository.PackageRepositorySingleton;
 import at.fhtw.mtcgapp.persistence.repository.UserRepositorySingleton;
 import at.fhtw.mtcgapp.util.ValidatorSingleton;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum PackageServiceSingleton {
     INSTANCE(new PackageServiceImpl(
             AuthenticationServiceSingleton.INSTANCE.getAuthenticationService(),
@@ -17,8 +19,4 @@ public enum PackageServiceSingleton {
     ));
 
     private final PackageService packageService;
-
-    PackageServiceSingleton(PackageService packageService) {
-        this.packageService = packageService;
-    }
 }
