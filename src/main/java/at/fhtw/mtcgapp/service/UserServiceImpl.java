@@ -33,7 +33,8 @@ public class UserServiceImpl implements UserService {
 
         User user = authenticationService.getCurrentlyLoggedInUser(authToken);
 
-        if (!user.getUsername().equals(username)) {
+        if (!user.getUsername().equalsIgnoreCase(username)) {
+            log.warn("User {} tried to request data of user {}", user.getUsername(), username);
             throw ForbiddenException.forbidden();
         }
 
@@ -89,8 +90,14 @@ public class UserServiceImpl implements UserService {
 
         User user = authenticationService.getCurrentlyLoggedInUser(authToken);
 
-        if (!user.getUsername().equals(username)) {
+        if (!user.getUsername().equalsIgnoreCase(username)) {
+            log.warn("User {} tried to update data of user {}", user.getUsername(), username);
             throw ForbiddenException.forbidden();
+        }
+
+        if (userRepository.existsByUsername(command.name()) && !command.name().equals(user.getUsername())) {
+            log.warn("User with username {} already exists!", command.name());
+            throw UserValidationException.userWithUsernameAlreadyExists(command.name());
         }
 
         user.setUsername(command.name());

@@ -86,7 +86,7 @@ ALTER TABLE IF EXISTS mtcg.card OWNER to mtcgdb;
 
 CREATE TABLE IF NOT EXISTS mtcg.monster_card
 (
-    defence double precision
+    defence double precision,
     PRIMARY KEY (id)
 )
 INHERITS (mtcg.card);
@@ -95,7 +95,7 @@ ALTER TABLE IF EXISTS mtcg.monster_card OWNER to mtcgdb;
 
 CREATE TABLE IF NOT EXISTS mtcg.spell_card
 (
-    critical_hit_multiplier double precision
+    critical_hit_multiplier double precision,
     PRIMARY KEY (id)
 )
 INHERITS (mtcg.card);

@@ -56,7 +56,7 @@ public class PackageRepositoryImpl implements PackageRepository {
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
                 SELECT package.id, package.token, package.price
                 FROM mtcg.package
-                ORDER BY RANDOM() LIMIT 1
+                ORDER BY id LIMIT 1
                 """)) {
             ResultSet resultSet = preparedStatement.executeQuery();
 

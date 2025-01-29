@@ -1,18 +1,6 @@
 version: '3'
 
 services:
-  mtcg:
-    container_name: mtcg
-    build:
-      context: ../../../
-      dockerfile: src/main/docker/Dockerfile
-    ports:
-      - "10001:10001"
-    depends_on:
-      - postgres
-    networks:
-      - mtcg
-
   postgres:
     image: 'postgres:17-alpine'
     container_name: mtcgdb

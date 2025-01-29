@@ -12,15 +12,43 @@ import java.util.UUID;
 @NoArgsConstructor
 @SuperBuilder
 public abstract class Card {
-    private long id;
-    private UUID token;
-    private String name;
-    private double damage;
+    protected long id;
+    protected UUID token;
+    protected String name;
+    protected double damage;
 
-    private User user;
-    private DamageType damageType;
-    private Trade trade;
-    private Package cardPackage;
+    protected User user;
+    protected DamageType damageType;
+    protected Trade trade;
+    protected Package cardPackage;
+
+    public double calculateDamage(Card otherCard) {
+        if (hasWeakness(otherCard)) {
+            return 0;
+        }
+        return switch (otherCard) {
+            case MonsterCard otherMonsterCard -> calculateDamageMonsterCard(otherMonsterCard);
+            case SpellCard otherSpellCard -> calculateDamageSpellCard(otherSpellCard);
+            default -> damage;
+        };
+    }
+
+    protected abstract double calculateDamageMonsterCard(MonsterCard otherCard);
+    protected abstract double calculateDamageSpellCard(SpellCard otherCard);
+
+    public boolean hasWeakness(Card otherCard) {
+        return (this.name.contains("Goblin") && otherCard.getName().contains("Dragon")) ||
+               (this.name.contains("Ork") && otherCard.getName().contains("Wizard")) ||
+               (this.name.contains("Knight") && otherCard.getName().equals("WaterSpell")) ||
+               (this.name.contains("Spell") && otherCard.getName().contains("Kraken")) ||
+               (this.name.equals("FireElves") && otherCard.getName().contains("Dragon"));
+    }
+
+    public boolean hasElementAdvantage(Card otherCard) {
+        return (this.damageType == DamageType.WATER && otherCard.getDamageType() == DamageType.FIRE) ||
+            (this.damageType == DamageType.FIRE && otherCard.getDamageType() == DamageType.NORMAL) ||
+            (this.damageType == DamageType.NORMAL && otherCard.getDamageType() == DamageType.WATER);
+    }
 
     @Override
     public String toString() {

@@ -21,6 +21,7 @@
         <jackson-databind.version>2.15.4</jackson-databind.version>
         <!--Database-->
         <postgresql.version>42.7.4</postgresql.version>
+        <mybatis.version>3.5.19</mybatis.version>
         <!--Testing-->
         <junit-jupiter-engine.version>5.11.3</junit-jupiter-engine.version>
         <assertj-core.version>3.26.3</assertj-core.version>
@@ -62,6 +63,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>${mybatis.version}</version>
         </dependency>
 
         <!--Testing-->

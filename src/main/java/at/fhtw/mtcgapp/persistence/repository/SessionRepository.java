@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface SessionRepository {
     Optional<User> findUserByToken(String token);
+    Optional<Session> findSessionByUserId(long id);
     Session save(Session session);
-    boolean existsByToken(String token);
     void deleteByToken(String token);
 }

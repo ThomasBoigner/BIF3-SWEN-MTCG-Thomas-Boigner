@@ -66,6 +66,33 @@ public class SessionRepositoryImpl implements SessionRepository {
     }
 
     @Override
+    public Optional<Session> findSessionByUserId(long id) {
+        log.debug("Trying to find session of user with id {}", id);
+        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
+                SELECT session.id, session.token
+                FROM mtcg.session
+                WHERE session.fk_user_id = ?
+                """)) {
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            Session session = Session.builder()
+                    .id(resultSet.getLong("id"))
+                    .token(resultSet.getString("token"))
+                    .build();
+
+            return Optional.of(session);
+        } catch (SQLException e) {
+            log.error("Could not find session of user due to a sql exception");
+            throw new DataAccessException("Select failed!", e);
+        }
+    }
+
+    @Override
     public Session save(Session session) {
         log.debug("Trying to create session {}", session);
         try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
@@ -87,31 +114,6 @@ public class SessionRepositoryImpl implements SessionRepository {
             unitOfWork.rollbackTransaction();
             log.error("Could not create session due to a sql exception");
             throw new DataAccessException("Insert into failed!", e);
-        }
-    }
-
-    @Override
-    public boolean existsByToken(String token) {
-        log.debug("Trying to evaluate if session with token {} already exists", token);
-        try (PreparedStatement preparedStatement = this.unitOfWork.prepareStatement("""
-                SELECT EXISTS(
-                    SELECT token
-                    FROM mtcg.session
-                    WHERE token = ?
-                )
-                """)) {
-            preparedStatement.setString(1, token);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            boolean exists = false;
-            if(resultSet.next()) {
-                exists = resultSet.getBoolean(1);
-            }
-            log.debug(exists ? "Session with token {} does exist" : " Session with token {} does not exist", token);
-            return exists;
-        } catch (SQLException e) {
-            log.error("Could not evaluate if session exists due to a sql exception");
-            throw new DataAccessException("Exists failed!", e);
         }
     }
 

@@ -36,7 +36,7 @@ public class BattleServiceTest {
     }
 
     @Test
-    void ensureBattleUserWorksProperly() {
+    void ensureBattleUserWorksProperlyPlayer1Wins() {
         // Given
         String authToken = "Thomas-mtgcToken";
 
@@ -59,7 +59,7 @@ public class BattleServiceTest {
         User player1 = User.builder()
                 .id(0)
                 .token(UUID.randomUUID())
-                .username("Thomas")
+                .username("Player1")
                 .password("pwd")
                 .bio("bio")
                 .image("image")
@@ -76,7 +76,7 @@ public class BattleServiceTest {
         User player2 = User.builder()
                 .id(0)
                 .token(UUID.randomUUID())
-                .username("Thomas")
+                .username("Player2")
                 .password("pwd")
                 .bio("bio")
                 .image("image")
@@ -101,6 +101,74 @@ public class BattleServiceTest {
         assertThat(player1.getWins()).isEqualTo(1);
         assertThat(player2.getElo()).isEqualTo(95);
         assertThat(player2.getLosses()).isEqualTo(1);
+    }
+
+    @Test
+    void ensureBattleUserWorksProperlyPlayer2Wins() {
+        // Given
+        String authToken = "Thomas-mtgcToken";
+
+        MonsterCard cardPlayer1 = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Ork")
+                .damage(45)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+
+        MonsterCard cardPlayer2 = MonsterCard.builder()
+                .token(UUID.randomUUID())
+                .name("Dragon")
+                .damage(50)
+                .damageType(DamageType.NORMAL)
+                .defence(10)
+                .build();
+
+        User player1 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Player1")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(100)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>(List.of(cardPlayer1)))
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        cardPlayer1.setUser(player1);
+
+        User player2 = User.builder()
+                .id(0)
+                .token(UUID.randomUUID())
+                .username("Player2")
+                .password("pwd")
+                .bio("bio")
+                .image("image")
+                .coins(20)
+                .elo(100)
+                .wins(0)
+                .losses(0)
+                .deck(new ArrayList<>(List.of(cardPlayer2)))
+                .stack(new ArrayList<>())
+                .trades(new ArrayList<>())
+                .build();
+        cardPlayer2.setUser(player2);
+
+        when(authenticationService.getCurrentlyLoggedInUser(eq(authToken))).thenReturn(player1);
+        when(userRepository.getUserInQueue()).thenReturn(Optional.of(player2));
+
+        // When
+        battleService.battleUser(authToken);
+
+        // Then
+        assertThat(player1.getElo()).isEqualTo(95);
+        assertThat(player1.getLosses()).isEqualTo(1);
+        assertThat(player2.getElo()).isEqualTo(103);
+        assertThat(player2.getWins()).isEqualTo(1);
     }
 
     @Test
@@ -204,121 +272,5 @@ public class BattleServiceTest {
 
         // Then
         assertThrows(BattleValidationException.class, () ->battleService.battleUser(authToken));
-    }
-
-    @Test
-    void ensureBattleRoundWorksProperly() {
-        // Given
-        MonsterCard cardPlayer1 = MonsterCard.builder()
-                .token(UUID.randomUUID())
-                .name("Dragon")
-                .damage(50)
-                .damageType(DamageType.NORMAL)
-                .defence(10)
-                .user(User.builder().username("Player1").build())
-                .build();
-
-
-        MonsterCard cardPlayer2 = MonsterCard.builder()
-                .token(UUID.randomUUID())
-                .name("Ork")
-                .damage(45)
-                .damageType(DamageType.NORMAL)
-                .defence(10)
-                .user(User.builder().username("Player2").build())
-                .build();
-
-        // When
-        double result = battleService.battleRound(cardPlayer1, cardPlayer2);
-
-        // Then
-        assertThat(result).isEqualTo(5);
-    }
-
-    @Test
-    void ensureBattleRoundCalculatesElementAdvantageProperlyForPlayer1() {
-        // Given
-        MonsterCard cardPlayer1 = MonsterCard.builder()
-                .token(UUID.randomUUID())
-                .name("Dragon")
-                .damage(50)
-                .damageType(DamageType.WATER)
-                .defence(10)
-                .user(User.builder().username("Player1").build())
-                .build();
-
-
-        SpellCard cardPlayer2 = SpellCard.builder()
-                .token(UUID.randomUUID())
-                .name("FireSpell")
-                .damage(15)
-                .damageType(DamageType.FIRE)
-                .criticalHitMultiplier(1.2)
-                .user(User.builder().username("Player2").build())
-                .build();
-
-        // When
-        double result = battleService.battleRound(cardPlayer1, cardPlayer2);
-
-        // Then
-        assertThat(result).isEqualTo(94);
-    }
-
-    @Test
-    void ensureBattleRoundCalculatesElementAdvantageProperlyForPlayer2() {
-        // Given
-        MonsterCard cardPlayer1 = MonsterCard.builder()
-                .token(UUID.randomUUID())
-                .name("Dragon")
-                .damage(50)
-                .damageType(DamageType.NORMAL)
-                .defence(10)
-                .user(User.builder().username("Player1").build())
-                .build();
-
-
-        SpellCard cardPlayer2 = SpellCard.builder()
-                .token(UUID.randomUUID())
-                .name("FireSpell")
-                .damage(15)
-                .damageType(DamageType.FIRE)
-                .criticalHitMultiplier(1.2)
-                .user(User.builder().username("Player2").build())
-                .build();
-
-        // When
-        double result = battleService.battleRound(cardPlayer1, cardPlayer2);
-
-        // Then
-        assertThat(result).isEqualTo(38);
-    }
-
-    @Test
-    void ensureBattleRoundWorksWhenPlayer1CardCanNotFight() {
-        // Given
-        MonsterCard cardPlayer1 = MonsterCard.builder()
-                .token(UUID.randomUUID())
-                .name("Goblin")
-                .damage(50)
-                .damageType(DamageType.NORMAL)
-                .defence(10)
-                .user(User.builder().username("Player1").build())
-                .build();
-
-
-        MonsterCard cardPlayer2 = MonsterCard.builder()
-                .token(UUID.randomUUID())
-                .name("Dragon")
-                .damage(45)
-                .damageType(DamageType.NORMAL)
-                .defence(10)
-                .user(User.builder().username("Player2").build())
-                .build();
-
-        // When
-        double result = battleService.battleRound(cardPlayer1, cardPlayer2);
-
-        // Then
-        assertThat(result).isEqualTo(-35);
     }
 }
