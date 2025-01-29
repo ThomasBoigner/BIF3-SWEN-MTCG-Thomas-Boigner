@@ -45,6 +45,3 @@ The project model represents the various components and their relationships with
 
 5. **Response Generation**:
     - After processing the request, the service returns the response to the controller, which then sends it back to the user interface.
-
-## Todo
-- refactor getting currently logged in user to be called in controller

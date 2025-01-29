@@ -22,23 +22,32 @@ public abstract class Card {
     protected Trade trade;
     protected Package cardPackage;
 
-    public double calculateDamage(Card cardOfOtherPlayer) {
-        if (cardOfOtherPlayer instanceof MonsterCard) {
-            return calculateDamage((MonsterCard) cardOfOtherPlayer);
+    public double calculateDamage(Card otherCard) {
+        if (hasWeakness(otherCard)) {
+            return 0;
         }
-        if (cardOfOtherPlayer instanceof SpellCard) {
-            return calculateDamage((SpellCard) cardOfOtherPlayer);
-        }
-        return damage;
+        return switch (otherCard) {
+            case MonsterCard otherMonsterCard -> calculateDamageMonsterCard(otherMonsterCard);
+            case SpellCard otherSpellCard -> calculateDamageSpellCard(otherSpellCard);
+            default -> damage;
+        };
     }
 
-    protected abstract double calculateDamage(MonsterCard otherCard);
-    protected abstract double calculateDamage(SpellCard otherCard);
+    protected abstract double calculateDamageMonsterCard(MonsterCard otherCard);
+    protected abstract double calculateDamageSpellCard(SpellCard otherCard);
 
-    protected boolean hasElementAdvantage(Card otherCard) {
-        return (this.getDamageType() == DamageType.WATER && otherCard.getDamageType() == DamageType.FIRE) ||
-            (this.getDamageType() == DamageType.FIRE && otherCard.getDamageType() == DamageType.NORMAL) ||
-            (this.getDamageType() == DamageType.NORMAL && otherCard.getDamageType() == DamageType.WATER);
+    public boolean hasWeakness(Card otherCard) {
+        return (this.name.contains("Goblin") && otherCard.getName().contains("Dragon")) ||
+               (this.name.contains("Ork") && otherCard.getName().contains("Wizard")) ||
+               (this.name.contains("Knight") && otherCard.getName().equals("WaterSpell")) ||
+               (this.name.contains("Spell") && otherCard.getName().contains("Kraken")) ||
+               (this.name.equals("FireElves") && otherCard.getName().contains("Dragon"));
+    }
+
+    public boolean hasElementAdvantage(Card otherCard) {
+        return (this.damageType == DamageType.WATER && otherCard.getDamageType() == DamageType.FIRE) ||
+            (this.damageType == DamageType.FIRE && otherCard.getDamageType() == DamageType.NORMAL) ||
+            (this.damageType == DamageType.NORMAL && otherCard.getDamageType() == DamageType.WATER);
     }
 
     @Override

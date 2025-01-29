@@ -14,12 +14,12 @@ public class MonsterCard extends Card {
     private double defence;
 
     @Override
-    public double calculateDamage(MonsterCard otherCard) {
+    protected double calculateDamageMonsterCard(MonsterCard otherCard) {
         return this.damage - otherCard.defence;
     }
 
     @Override
-    public double calculateDamage(SpellCard otherCard) {
+    protected double calculateDamageSpellCard(SpellCard otherCard) {
         if (hasElementAdvantage(otherCard)) {
             return this.damage * 2;
         }

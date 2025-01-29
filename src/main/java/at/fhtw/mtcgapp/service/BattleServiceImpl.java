@@ -88,30 +88,9 @@ public class BattleServiceImpl implements BattleService {
     }
 
     public double battleRound(Card cardPlayer1, Card cardPlayer2) {
-        String player1Username = cardPlayer1.getUser().getUsername();
-        String player2Username = cardPlayer2.getUser().getUsername();
-
-        log.info("{} fights with card {} and {} with card {}", player1Username, cardPlayer1, player2Username, cardPlayer2);
+        log.info("{} fights with card {} and {} with card {}", cardPlayer1.getUser().getUsername(), cardPlayer1, cardPlayer2.getUser().getUsername(), cardPlayer2);
         double player1Damage = cardPlayer1.calculateDamage(cardPlayer2);
         double player2Damage = cardPlayer2.calculateDamage(cardPlayer1);
-
-        if ((cardPlayer1.getName().contains("Goblin") && cardPlayer2.getName().contains("Dragon")) ||
-            (cardPlayer1.getName().contains("Ork") && cardPlayer2.getName().contains("Wizzard")) ||
-            (cardPlayer1.getName().contains("Knight") && cardPlayer2.getName().equals("WaterSpell")) ||
-            (cardPlayer1.getName().contains("Spell") && cardPlayer2.getName().contains("Kraken")) ||
-            (cardPlayer1.getName().equals("FireElves") && cardPlayer2.getName().contains("Dragon"))) {
-            player1Damage = 0;
-            log.info("{}'s card can not fight against {}'s card, therefore his damage is set to 0", player1Username, player2Username);
-        }
-
-        if ((cardPlayer2.getName().contains("Goblin") && cardPlayer1.getName().contains("Dragon")) ||
-            (cardPlayer2.getName().contains("Ork") && cardPlayer1.getName().contains("Wizzard")) ||
-            (cardPlayer2.getName().contains("Knight") && cardPlayer1.getName().equals("WaterSpell")) ||
-            (cardPlayer2.getName().contains("Spell") && cardPlayer1.getName().contains("Kraken")) ||
-            (cardPlayer2.getName().equals("FireElves") && cardPlayer1.getName().contains("Dragon"))) {
-            player2Damage = 0;
-            log.info("{}'s card can not fight against {}'s card, therefore his damage is set to 0", player2Username, player1Username);
-        }
 
         double result = player1Damage - player2Damage;
         log.info("The result is {}", result);
