@@ -45,3 +45,14 @@ The project model represents the various components and their relationships with
 
 5. **Response Generation**:
     - After processing the request, the service returns the response to the controller, which then sends it back to the user interface.
+
+## Lessons learned
+
+- Building a Http server without a framework, especially using JDBC instead of JPA.
+- Implementing the game logic and handling all possible user input.
+
+## Unit testing decisions
+I used Junit and mockito to write unit tests for almost all parts of the application. For repository tests I used Testcontainers to start a docker container running a postgres image that the application then connects to for the testcase. 
+
+## Unique Feature
+My unique feature is that spell cards have a percentage based damage increase and monster cards can bock the damage of other cards.
